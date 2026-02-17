@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Construção PRO 6.0</title>
+<title>Construção PRO 7.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -108,6 +108,20 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);bo
 select option{background:var(--s2);}
 textarea{resize:vertical;min-height:60px;}
 
+/* ── LOJA ATIVA ── */
+.loja-ativa-bar{
+  background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(249,115,22,.12));
+  border:1px solid rgba(245,158,11,.3);border-radius:var(--radius);
+  padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.loja-ativa-info{display:flex;align-items:center;gap:10px;}
+.loja-badge{
+  background:var(--gold);color:#0c0e14;padding:6px 14px;border-radius:20px;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;
+}
+.loja-btns{display:flex;gap:8px;}
+
 /* ── BUTTONS ── */
 .btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.4px;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
 .btn-gold{background:var(--gold);color:#0c0e14;width:100%;justify-content:center;padding:12px;}
@@ -118,6 +132,8 @@ textarea{resize:vertical;min-height:60px;}
 .btn-red:hover{background:rgba(239,68,68,.22);}
 .btn-green{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
 .btn-green:hover{background:rgba(16,185,129,.22);}
+.btn-blue{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25);}
+.btn-blue:hover{background:rgba(59,130,246,.22);}
 .btn-sm{padding:5px 10px;font-size:.72rem;border-radius:6px;}
 .btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);width:100%;justify-content:center;padding:9px;margin-top:6px;}
 .btn-cancel:hover{color:var(--red);border-color:var(--red);}
@@ -132,6 +148,63 @@ td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:middle;}
 tr:hover td{background:rgba(255,255,255,.02);}
 .no-data{text-align:center;padding:44px 20px;color:var(--muted);}
 .no-data .ico{font-size:2.5rem;margin-bottom:10px;opacity:.4;}
+
+/* ── AGRUPAMENTO POR LOJA ── */
+.loja-group{
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;
+  margin-bottom:16px;overflow:hidden;
+}
+.loja-group-header{
+  background:linear-gradient(135deg,var(--s3),var(--s2));
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:background .2s;flex-wrap:wrap;gap:10px;
+}
+.loja-group-header:hover{background:var(--s3);}
+.loja-group-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;
+  display:flex;align-items:center;gap:10px;
+}
+.loja-group-stats{display:flex;gap:16px;font-size:.75rem;color:var(--muted);flex-wrap:wrap;}
+.loja-group-stats span{display:flex;align-items:center;gap:5px;}
+.loja-group-body{padding:14px 18px;}
+.loja-group-body.collapsed{display:none;}
+.chevron{transition:transform .2s;font-size:1.1rem;color:var(--muted);}
+.chevron.open{transform:rotate(180deg);}
+
+/* Destaque de melhor preço por material */
+.melhor-preco-material{
+  background:rgba(16,185,129,.08)!important;
+  border-left:3px solid var(--green)!important;
+}
+.melhor-preco-material td{font-weight:600;}
+
+/* Destaque de loja mais barata (total) */
+.loja-mais-barata .loja-group-header{
+  background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.08));
+  border:1px solid rgba(16,185,129,.3);
+}
+
+/* ── COMPARATIVO ── */
+.comparativo-card{
+  background:var(--s1);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin-bottom:20px;
+}
+.comparativo-table{
+  width:100%;border-collapse:separate;border-spacing:0 8px;
+}
+.comparativo-table th{
+  background:var(--s2);padding:10px 14px;font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+}
+.comparativo-table td{
+  background:var(--s2);padding:12px 14px;
+}
+.comparativo-table tr td:first-child{
+  border-radius:8px 0 0 8px;font-weight:600;
+}
+.comparativo-table tr td:last-child{border-radius:0 8px 8px 0;}
+.preco-destaque{color:var(--green);font-weight:700;font-size:.95rem;}
+.preco-normal{color:var(--text);}
 
 /* ── BADGES ── */
 .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap;}
@@ -212,10 +285,29 @@ canvas{max-height:240px;}
   </div>
 </div>
 
+<!-- MODAL DEFINIR LOJA -->
+<div class="overlay" id="mDefinirLoja">
+  <div class="modal">
+    <h3>🏬 Definir Loja para Pesquisa</h3>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">
+      Todos os materiais que você adicionar agora ficarão agrupados nesta loja.
+    </p>
+    <div class="fg">
+      <label>Nome da Loja</label>
+      <input id="inputLojaAtiva" placeholder="Ex: Leroy Merlin, Casa do Construtor..." list="lojasExistentes"/>
+      <datalist id="lojasExistentes"></datalist>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="$('mDefinirLoja').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-gold" style="width:auto;padding:9px 20px" onclick="confirmarLojaAtiva()">Definir Loja</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════ HEADER -->
 <div class="header">
-  <h1>🧱 Construção PRO 6.0</h1>
-  <p>Materiais · Serviços · Locais · Compras · Google Sheets em tempo real</p>
+  <h1>🧱 Construção PRO 7.0</h1>
+  <p>Comparador inteligente · Agrupamento por loja · Melhor preço automático</p>
 </div>
 
 <!-- SYNC BAR -->
@@ -244,12 +336,36 @@ canvas{max-height:240px;}
 
 <!-- ══════════════════════════════════════════════ ABA: MATERIAIS -->
 <div class="form-section active" id="sec-materiais">
+
+  <!-- LOJA ATIVA -->
+  <div class="loja-ativa-bar" id="barraLojaAtiva" style="display:none">
+    <div class="loja-ativa-info">
+      <span style="color:var(--muted);font-size:.8rem">🏬 Pesquisando em:</span>
+      <span class="loja-badge" id="txtLojaAtiva">—</span>
+      <span style="color:var(--muted);font-size:.75rem" id="qtdItensLoja">0 itens nesta loja</span>
+    </div>
+    <div class="loja-btns">
+      <button class="btn btn-ghost btn-sm" onclick="trocarLoja()">🔄 Trocar Loja</button>
+      <button class="btn btn-red btn-sm" onclick="desativarLoja()">✕ Limpar</button>
+    </div>
+  </div>
+
   <div class="page-grid">
     <div class="card form-card"><div class="card-body">
       <div class="form-title">📦 <span id="matFormTitle">Novo Material</span></div>
+
+      <!-- Botão de definir loja -->
+      <button class="btn btn-blue" style="margin-bottom:12px;width:100%" onclick="$('mDefinirLoja').classList.add('open')">
+        🏬 Definir Loja Atual
+      </button>
+
       <div class="fg fcol"><label>Material *</label><input id="m-material" placeholder="Ex: Cimento CP-II"/></div>
       <div class="fg fcol"><label>Marca</label><input id="m-marca" placeholder="Ex: Votorantim"/></div>
-      <div class="fg fcol"><label>Loja *</label><input id="m-loja" placeholder="Ex: Leroy Merlin"/></div>
+      <div class="fg fcol">
+        <label>Loja * <span style="font-weight:400;font-size:.68rem">(autopreenchida se loja ativa)</span></label>
+        <input id="m-loja" placeholder="Ex: Leroy Merlin" list="lojasExistentes2"/>
+        <datalist id="lojasExistentes2"></datalist>
+      </div>
       <div class="frow">
         <div class="fg"><label>Valor Total (R$) *</label><input type="number" id="m-valor" placeholder="0,00" step=".01" min="0"/></div>
         <div class="fg"><label>Quantidade *</label><input type="number" id="m-qtd" placeholder="1" step=".01" min="0"/></div>
@@ -275,28 +391,41 @@ canvas{max-height:240px;}
       <button class="btn btn-cancel" onclick="cancelarMat()">✕ Cancelar</button>
     </div></div>
 
-    <div class="card">
-      <div class="filter-row">
-        <input id="m-filtro" placeholder="🔍 Filtrar..." oninput="renderMat()"/>
-        <select id="m-fLoja" onchange="renderMat()"><option value="">Todas as lojas</option></select>
-        <select id="m-fUnidade" onchange="renderMat()">
-          <option value="">Todas unidades</option>
-          <option value="un">Unidade</option><option value="dz">Dúzia</option>
-          <option value="m2">m²</option><option value="m3">m³</option>
-          <option value="ml">Metro Linear</option><option value="kg">Kg</option>
-          <option value="sc">Saco</option><option value="cx">Caixa</option>
-          <option value="lt">Litro</option><option value="pc">Peça</option>
-          <option value="bd">Balde</option><option value="rl">Rolo</option>
-        </select>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <!-- COMPARATIVO DE LOJAS -->
+      <div class="comparativo-card">
+        <h3 style="font-family:'Syne';font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--gold)">
+          💰 Comparativo Total por Loja
+        </h3>
+        <table class="comparativo-table">
+          <thead><tr>
+            <th>Loja</th><th>Qtd Itens</th><th>Valor Total</th><th>Situação</th>
+          </tr></thead>
+          <tbody id="tblComparativo"></tbody>
+        </table>
       </div>
-      <div class="tbl-wrap">
-        <table><thead><tr>
-          <th>Material / Marca</th><th>Loja</th><th>Qtd</th><th>Valor Total</th><th>Valor Unit.</th><th>Ações</th>
-        </tr></thead><tbody id="tMat"></tbody></table>
-      </div>
-      <div class="btn-row" style="padding:14px 18px">
-        <button class="btn btn-ghost btn-sm" onclick="exportar('materiais')">📥 Excel</button>
-        <button class="btn btn-ghost btn-sm" onclick="gerarPDF()">📄 PDF</button>
+
+      <!-- MATERIAIS AGRUPADOS POR LOJA -->
+      <div class="card" style="padding:0">
+        <div class="filter-row">
+          <input id="m-filtro" placeholder="🔍 Filtrar por material ou marca..." oninput="renderMat()"/>
+          <select id="m-fUnidade" onchange="renderMat()">
+            <option value="">Todas unidades</option>
+            <option value="un">Unidade</option><option value="dz">Dúzia</option>
+            <option value="m2">m²</option><option value="m3">m³</option>
+            <option value="ml">Metro Linear</option><option value="kg">Kg</option>
+            <option value="sc">Saco</option><option value="cx">Caixa</option>
+            <option value="lt">Litro</option><option value="pc">Peça</option>
+            <option value="bd">Balde</option><option value="rl">Rolo</option>
+          </select>
+        </div>
+        <div style="padding:18px" id="listaLojasAgrupadas">
+          <div class="no-data"><div class="ico">📦</div>Nenhum material cadastrado</div>
+        </div>
+        <div class="btn-row" style="padding:14px 18px;border-top:1px solid var(--border)">
+          <button class="btn btn-ghost btn-sm" onclick="exportar('materiais')">📥 Excel</button>
+          <button class="btn btn-ghost btn-sm" onclick="gerarPDF()">📄 PDF</button>
+        </div>
       </div>
     </div>
   </div>
@@ -517,11 +646,13 @@ const DB = {
   compras:[]
 };
 
+let LOJA_ATIVA = localStorage.getItem('lojaAtiva7') || '';
+
 const UL = {un:'un',dz:'dz',m2:'m²',m3:'m³',ml:'ml',kg:'kg',sc:'sc',cx:'cx',lt:'lt',pc:'pc',bd:'bd',rl:'rl'};
 const UN_LABEL = {un:'Unidade',dz:'Dúzia',m2:'m²',m3:'m³',ml:'Metro Linear',kg:'Kg',sc:'Saco',cx:'Caixa',lt:'Litro',pc:'Peça',bd:'Balde',rl:'Rolo'};
 
-let WEB_APP = localStorage.getItem('wp6')  || '';
-let SHEET_ID= localStorage.getItem('sid6') || '1mTrzGNHt0rPxf-uNabcHHCe4p5MnT2Cy6_thMM77xOQ';
+let WEB_APP = localStorage.getItem('wp7')  || '';
+let SHEET_ID= localStorage.getItem('sid7') || '1mTrzGNHt0rPxf-uNabcHHCe4p5MnT2Cy6_thMM77xOQ';
 let syncTimer = null;
 let charts = {};
 
@@ -553,6 +684,7 @@ const STATUS_COMP = {
 window.onload = ()=>{
   carregar();
   renderAll();
+  atualizarBarraLoja();
   if(WEB_APP){ iniciarSync(); syncNow(); }
   else{ setSyncStatus('off','Sheets não configurado'); }
 };
@@ -561,15 +693,61 @@ function $(id){ return document.getElementById(id); }
 
 function carregar(){
   ['materiais','servicos','locais','compras'].forEach(k=>{
-    const d = localStorage.getItem('cpro6_'+k);
+    const d = localStorage.getItem('cpro7_'+k);
     if(d) try{ DB[k]=JSON.parse(d); }catch(e){}
   });
 }
-function salvarLS(k){ localStorage.setItem('cpro6_'+k,JSON.stringify(DB[k])); }
+function salvarLS(k){ localStorage.setItem('cpro7_'+k,JSON.stringify(DB[k])); }
 
 function renderAll(){
   renderMat(); renderServ(); renderLoc(); renderComp();
-  atualizarStats(); atualizarSelectores();
+  atualizarStats(); atualizarSelectores(); atualizarComparativo();
+}
+
+// ══════════════════════════════════════════════════════════
+// LOJA ATIVA
+// ══════════════════════════════════════════════════════════
+function confirmarLojaAtiva(){
+  const loja = $('inputLojaAtiva').value.trim();
+  if(!loja){toast('Digite o nome da loja.','e');return;}
+  LOJA_ATIVA = loja;
+  localStorage.setItem('lojaAtiva7',LOJA_ATIVA);
+  $('mDefinirLoja').classList.remove('open');
+  atualizarBarraLoja();
+  $('m-loja').value = LOJA_ATIVA;
+  toast(`Loja definida: ${LOJA_ATIVA}`,'s');
+}
+
+function trocarLoja(){
+  $('inputLojaAtiva').value = LOJA_ATIVA;
+  $('mDefinirLoja').classList.add('open');
+}
+
+function desativarLoja(){
+  LOJA_ATIVA = '';
+  localStorage.removeItem('lojaAtiva7');
+  atualizarBarraLoja();
+  $('m-loja').value = '';
+  toast('Loja desativada.','i');
+}
+
+function atualizarBarraLoja(){
+  const barra = $('barraLojaAtiva');
+  if(LOJA_ATIVA){
+    barra.style.display = 'flex';
+    $('txtLojaAtiva').textContent = LOJA_ATIVA;
+    const qtd = DB.materiais.filter(i=>i.loja===LOJA_ATIVA).length;
+    $('qtdItensLoja').textContent = `${qtd} ${qtd===1?'item':'itens'} nesta loja`;
+    $('m-loja').value = LOJA_ATIVA;
+  } else {
+    barra.style.display = 'none';
+  }
+
+  // Atualiza datalist com lojas existentes
+  const lojas = [...new Set(DB.materiais.map(i=>i.loja))];
+  ['lojasExistentes','lojasExistentes2'].forEach(id=>{
+    $(id).innerHTML = lojas.map(l=>`<option value="${l}">`).join('');
+  });
 }
 
 // ══════════════════════════════════════════════════════════
@@ -609,7 +787,7 @@ function uid(){ return Date.now()+'_'+Math.random().toString(36).slice(2,7); }
 function now(){ return new Date().toISOString(); }
 
 // ══════════════════════════════════════════════════════════
-// SELECTORES (LOCAIS → select dos outros módulos)
+// SELECTORES
 // ══════════════════════════════════════════════════════════
 function atualizarSelectores(){
   const locOptions = DB.locais.map(l=>`<option value="${l.id}">${l.nome}</option>`).join('');
@@ -620,11 +798,6 @@ function atualizarSelectores(){
       : '<option value="">Geral / Sem destino</option>';
     el.innerHTML = primeiro + locOptions;
   });
-
-  // Lojas para filtro de materiais
-  const lojas = [...new Set(DB.materiais.map(i=>i.loja))];
-  $('m-fLoja').innerHTML = '<option value="">Todas as lojas</option>'
-    + lojas.map(l=>`<option value="${l}">${l}</option>`).join('');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -633,11 +806,14 @@ function atualizarSelectores(){
 function salvarMaterial(){
   const material = $('m-material').value.trim();
   const marca    = $('m-marca').value.trim();
-  const loja     = $('m-loja').value.trim();
+  let loja       = $('m-loja').value.trim();
   const valor    = parseFloat($('m-valor').value);
   const qtd      = parseFloat($('m-qtd').value);
   const unidade  = $('m-unidade').value;
   const editId   = $('m-editId').value;
+
+  // Se loja ativa, força o uso dela
+  if(LOJA_ATIVA) loja = LOJA_ATIVA;
 
   if(!material||!loja||isNaN(valor)||isNaN(qtd)||qtd<=0){toast('Preencha todos os campos obrigatórios.','e');return;}
 
@@ -652,12 +828,13 @@ function salvarMaterial(){
     DB.materiais.push({id:uid(),material,marca,loja,valor,qtd,unidade,vu,createdAt:now(),updatedAt:now()});
     toast('Material adicionado!','s');
   }
-  salvarLS('materiais'); cancelarMat(); renderMat(); atualizarStats(); atualizarSelectores();
+  salvarLS('materiais'); cancelarMat(); renderMat(); atualizarStats(); atualizarBarraLoja(); atualizarComparativo();
   if(WEB_APP) push('materiais');
 }
 
 function cancelarMat(){
-  ['m-material','m-marca','m-loja','m-valor','m-qtd'].forEach(id=>$(id).value='');
+  ['m-material','m-marca','m-valor','m-qtd'].forEach(id=>$(id).value='');
+  if(!LOJA_ATIVA) $('m-loja').value='';
   $('m-unidade').value='un'; $('m-editId').value='';
   $('matFormTitle').textContent='Novo Material';
 }
@@ -674,37 +851,128 @@ function editarMat(id){
 function excluirMat(id){
   if(!confirm('Excluir material?'))return;
   DB.materiais=DB.materiais.filter(i=>i.id!==id);
-  salvarLS('materiais'); renderMat(); atualizarStats();
+  salvarLS('materiais'); renderMat(); atualizarStats(); atualizarBarraLoja(); atualizarComparativo();
   if(WEB_APP) push('materiais'); toast('Excluído.','i');
 }
 
+// ══════════════════════════════════════════════════════════
+// RENDER MATERIAIS (AGRUPADO POR LOJA)
+// ══════════════════════════════════════════════════════════
 function renderMat(){
-  const filtro  = $('m-filtro').value.toLowerCase();
-  const fLoja   = $('m-fLoja').value;
-  const fUnid   = $('m-fUnidade').value;
+  const filtro = $('m-filtro').value.toLowerCase();
+  const fUnid  = $('m-fUnidade').value;
 
   let it = DB.materiais.filter(i=>{
-    const txt = (i.material+' '+i.loja+' '+(i.marca||'')).toLowerCase();
-    return(!filtro||txt.includes(filtro))&&(!fLoja||i.loja===fLoja)&&(!fUnid||i.unidade===fUnid);
+    const txt = (i.material+' '+(i.marca||'')).toLowerCase();
+    return(!filtro||txt.includes(filtro))&&(!fUnid||i.unidade===fUnid);
   });
 
-  const menores={};
-  it.forEach(i=>{ if(!menores[i.material]||i.vu<menores[i.material]) menores[i.material]=i.vu; });
+  if(!it.length){
+    $('listaLojasAgrupadas').innerHTML='<div class="no-data"><div class="ico">📦</div>Nenhum resultado</div>';
+    return;
+  }
 
-  if(!it.length){ $('tMat').innerHTML=`<tr><td colspan="6"><div class="no-data"><div class="ico">📦</div>Nenhum resultado</div></td></tr>`; return; }
+  // Agrupa por loja
+  const porLoja = {};
+  it.forEach(i=>{
+    if(!porLoja[i.loja]) porLoja[i.loja]=[];
+    porLoja[i.loja].push(i);
+  });
 
-  $('tMat').innerHTML = it.map(i=>{
-    const best = i.vu===menores[i.material];
-    const qtlbl= i.unidade==='dz'?`${i.qtd}dz (${i.qtd*12}un)`:`${i.qtd} ${UL[i.unidade]||i.unidade}`;
+  // Calcula menor preço POR MATERIAL (global, entre todas lojas)
+  const menoresPorMaterial = {};
+  it.forEach(i=>{
+    if(!menoresPorMaterial[i.material]||i.vu<menoresPorMaterial[i.material])
+      menoresPorMaterial[i.material]=i.vu;
+  });
+
+  // Renderiza grupos
+  const lojas = Object.keys(porLoja).sort();
+  $('listaLojasAgrupadas').innerHTML = lojas.map((loja,idx)=>{
+    const itensLoja = porLoja[loja];
+    const totalLoja = itensLoja.reduce((a,i)=>a+i.valor,0);
+    const qtdLoja   = itensLoja.length;
+
+    const linhas = itensLoja.map(i=>{
+      const isMelhor = i.vu === menoresPorMaterial[i.material];
+      const qtlbl = i.unidade==='dz'?`${i.qtd}dz (${i.qtd*12}un)`:`${i.qtd} ${UL[i.unidade]||i.unidade}`;
+      const classMelhor = isMelhor ? 'melhor-preco-material' : '';
+      return `<tr class="${classMelhor}">
+        <td><div style="font-weight:600">${i.material}${isMelhor?'<span class="badge badge-green" style="margin-left:6px">✓ Melhor preço</span>':''}</div>
+            ${i.marca?`<div style="margin-top:3px"><span class="badge badge-gold">${i.marca}</span></div>`:''}</td>
+        <td>${qtlbl}</td>
+        <td>R$ ${fmt(i.valor)}</td>
+        <td style="color:${isMelhor?'var(--green)':'var(--text)'};font-weight:${isMelhor?700:400}">
+          R$ ${i.vu.toFixed(4)}/${i.unidade==='dz'?'un':UL[i.unidade]||i.unidade}
+        </td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="editarMat('${i.id}')">✏️</button>
+          <button class="btn btn-red btn-sm" onclick="excluirMat('${i.id}')">🗑</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="loja-group" id="grupo-${idx}">
+      <div class="loja-group-header" onclick="toggleGrupo(${idx})">
+        <div class="loja-group-title">
+          <span>🏬 ${loja}</span>
+          <span class="chevron open" id="chev-${idx}">▼</span>
+        </div>
+        <div class="loja-group-stats">
+          <span>📦 ${qtdLoja} ${qtdLoja===1?'item':'itens'}</span>
+          <span style="color:var(--gold);font-weight:700">💰 Total: R$ ${fmt(totalLoja)}</span>
+        </div>
+      </div>
+      <div class="loja-group-body" id="body-${idx}">
+        <table style="margin-bottom:0">
+          <thead><tr>
+            <th>Material / Marca</th><th>Qtd</th><th>Valor Total</th><th>Valor Unit.</th><th>Ações</th>
+          </tr></thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleGrupo(idx){
+  const body = $('body-'+idx);
+  const chev = $('chev-'+idx);
+  if(body.classList.contains('collapsed')){
+    body.classList.remove('collapsed');
+    chev.classList.add('open');
+  } else {
+    body.classList.add('collapsed');
+    chev.classList.remove('open');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// COMPARATIVO DE LOJAS
+// ══════════════════════════════════════════════════════════
+function atualizarComparativo(){
+  const porLoja = {};
+  DB.materiais.forEach(i=>{
+    if(!porLoja[i.loja]) porLoja[i.loja]={total:0,qtd:0};
+    porLoja[i.loja].total += i.valor;
+    porLoja[i.loja].qtd++;
+  });
+
+  const lojas = Object.entries(porLoja).sort((a,b)=>a[1].total-b[1].total);
+  if(!lojas.length){
+    $('tblComparativo').innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted)">Nenhuma loja cadastrada</td></tr>';
+    return;
+  }
+
+  const menorTotal = lojas[0][1].total;
+
+  $('tblComparativo').innerHTML = lojas.map(([loja,info],i)=>{
+    const isMaisBarata = info.total === menorTotal;
     return `<tr>
-      <td><div style="font-weight:600">${i.material}${best?'<span class="badge badge-green" style="margin-left:6px">✓ Mais barato</span>':''}</div>
-          ${i.marca?`<div style="margin-top:3px"><span class="badge badge-gold">${i.marca}</span></div>`:''}</td>
-      <td>${i.loja}</td>
-      <td>${qtlbl}</td>
-      <td>R$ ${fmt(i.valor)}</td>
-      <td style="color:${best?'var(--green)':'var(--text)'};font-weight:${best?700:400}">R$ ${i.vu.toFixed(4)}/${i.unidade==='dz'?'un':UL[i.unidade]||i.unidade}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="editarMat('${i.id}')">✏️</button>
-          <button class="btn btn-red btn-sm" onclick="excluirMat('${i.id}')">🗑</button></td>
+      <td style="font-weight:600">${isMaisBarata?'🏆 ':''}<strong>${loja}</strong></td>
+      <td>${info.qtd}</td>
+      <td class="${isMaisBarata?'preco-destaque':'preco-normal'}">R$ ${fmt(info.total)}</td>
+      <td>${isMaisBarata?'<span class="badge badge-green">✓ Mais barata</span>':''}</td>
     </tr>`;
   }).join('');
 }
@@ -852,40 +1120,6 @@ const PRIO_COR={alta:'var(--red)',media:'var(--gold)',baixa:'var(--green)'};
 const TIPO_ICON={sala:'🛋️',cozinha:'🍳',quarto:'🛏️',banheiro:'🚿',area:'🌿',garagem:'🚗',quintal:'🌳',corredor:'🚶',fachada:'🏢',outro:'📍'};
 
 function renderLoc(){
-  const locais = DB.locais;
-  if(!locais.length){
-    $('gridLocais').innerHTML='<div class="no-data"><div class="ico">🏠</div>Nenhum local cadastrado</div>';
-    return;
-  }
-  $('gridLocais').innerHTML = locais.map(l=>{
-    const st  = STATUS_LOCAL[l.status]||STATUS_LOCAL.nao_iniciado;
-    const prog= l.progresso||0;
-    const ico = TIPO_ICON[l.tipo]||'📍';
-    const servVinc = DB.servicos.filter(s=>s.localId===l.id).length;
-    const compVinc = DB.compras.filter(c=>c.localId===l.id).length;
-    return `<div class="local-card">
-      <div class="lc-header">
-        <div class="lc-name">${ico} ${l.nome}</div>
-        <span class="badge ${st.cls}">${st.lbl}</span>
-      </div>
-      <div class="lc-meta">
-        Prioridade: <span style="color:${PRIO_COR[l.prioridade]||'var(--muted)'}; font-weight:700">${(l.prioridade||'—').charAt(0).toUpperCase()+(l.prioridade||'').slice(1)}</span>
-        ${servVinc?` · ${servVinc} serv.`:''} ${compVinc?` · ${compVinc} compras`:''}
-      </div>
-      ${l.obs?`<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px">${l.obs}</div>`:''}
-      <div class="progress" style="margin-bottom:6px">
-        <div class="progress-bar" style="width:${prog}%;background:${prog>=100?'var(--green)':prog>50?'var(--gold)':'var(--blue)'}"></div>
-      </div>
-      <div style="font-size:.72rem;color:var(--muted);text-align:right">${prog}% concluído</div>
-      <div class="lc-actions">
-        <button class="btn btn-ghost btn-sm" onclick="editarLoc('${l.id}')">✏️ Editar</button>
-        <button class="btn btn-red btn-sm" onclick="excluirLoc('${l.id}')">🗑</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function renderLoc(){ // redeclarada abaixo para incluir update de DOM
   const locais = DB.locais;
   if(!locais.length){
     $('gridLocais').innerHTML='<div class="no-data"><div class="ico">🏠</div>Nenhum local cadastrado</div>';
@@ -1110,7 +1344,7 @@ async function gerarPDF(){
   if(!DB.materiais.length){toast('Nenhum material para PDF.','e');return;}
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'landscape'});
-  doc.setFontSize(14); doc.text('Construção PRO 6.0 — Materiais',14,14);
+  doc.setFontSize(14); doc.text('Construção PRO 7.0 — Materiais',14,14);
   doc.setFontSize(8); doc.text('Gerado: '+new Date().toLocaleString('pt-BR'),14,20);
   const ths=['Material','Marca','Loja','Qtd','Valor Total','Valor Unit.'];
   const cs=[14,55,80,120,148,175];
@@ -1131,8 +1365,8 @@ async function gerarPDF(){
 function salvarConfig(){
   WEB_APP = $('mWebApp').value.trim();
   SHEET_ID= $('mSheetId').value.trim();
-  localStorage.setItem('wp6',WEB_APP);
-  localStorage.setItem('sid6',SHEET_ID);
+  localStorage.setItem('wp7',WEB_APP);
+  localStorage.setItem('sid7',SHEET_ID);
   $('mConfig').classList.remove('open');
   if(WEB_APP){ toast('Conectando ao Google Sheets...','i'); iniciarSync(); syncNow(); }
   else{ setSyncStatus('off','Sheets não configurado'); }
