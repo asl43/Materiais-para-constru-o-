@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Construção PRO 7.0</title>
+<title>Construção PRO 7.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -86,6 +86,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .stat.re::after{background:var(--red);}
 .stat-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:500;}
 .stat-val{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;margin-top:3px;}
+.stat-info{font-size:.68rem;color:var(--muted);margin-top:4px;}
 
 /* ── FORM ── */
 .form-section{display:none;}
@@ -107,6 +108,16 @@ input,select,textarea{
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,.12);}
 select option{background:var(--s2);}
 textarea{resize:vertical;min-height:60px;}
+
+.form-divider{
+  border-top:1px solid var(--border);padding-top:12px;margin-top:12px;
+  position:relative;
+}
+.form-divider::before{
+  content:attr(data-label);position:absolute;top:-10px;left:10px;
+  background:var(--s1);padding:0 8px;font-size:.7rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;font-weight:600;
+}
 
 /* ── LOJA ATIVA ── */
 .loja-ativa-bar{
@@ -207,7 +218,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .preco-normal{color:var(--text);}
 
 /* ── BADGES ── */
-.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap;}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;whitespace:nowrap;}
 .badge-gold{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3);}
 .badge-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
 .badge-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
@@ -261,6 +272,12 @@ canvas{max-height:240px;}
 .local-card .lc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
 .local-card .lc-meta{font-size:.78rem;color:var(--muted);margin-bottom:8px;}
 .local-card .lc-actions{display:flex;gap:6px;margin-top:12px;}
+
+.qtd-info{
+  background:var(--s3);border:1px solid var(--border);border-radius:8px;
+  padding:8px 12px;font-size:.75rem;margin-top:8px;
+}
+.qtd-info strong{color:var(--gold);}
 </style>
 </head>
 <body>
@@ -306,8 +323,8 @@ canvas{max-height:240px;}
 
 <!-- ══════════════════════════════════════════════ HEADER -->
 <div class="header">
-  <h1>🧱 Construção PRO 7.0</h1>
-  <p>Comparador inteligente · Agrupamento por loja · Melhor preço automático</p>
+  <h1>🧱 Construção PRO 7.1</h1>
+  <p>Comparador inteligente · Total pago real · Quantidade necessária vs comprada</p>
 </div>
 
 <!-- SYNC BAR -->
@@ -439,6 +456,8 @@ canvas{max-height:240px;}
       <div class="fg fcol"><label>Descrição do Serviço *</label><input id="s-descricao" placeholder="Ex: Instalação elétrica sala"/></div>
       <div class="fg fcol"><label>Empresa / Prestador *</label><input id="s-empresa" placeholder="Ex: Elétrica Silva Ltda"/></div>
       <div class="fg fcol"><label>Profissional / Pedreiro</label><input id="s-pedreiro" placeholder="Ex: João da Silva"/></div>
+      
+      <div class="form-divider" data-label="💰 Valor & Pagamento"></div>
       <div class="frow">
         <div class="fg"><label>Valor do Serviço (R$) *</label><input type="number" id="s-valor" placeholder="0,00" step=".01" min="0"/></div>
         <div class="fg"><label>Data Prevista</label><input type="date" id="s-data"/></div>
@@ -451,14 +470,21 @@ canvas{max-height:240px;}
             <option value="parcial">Parcial</option>
           </select>
         </div>
-        <div class="fg"><label>Status Pagamento</label>
+        <div class="fg"><label>Status Pagamento *</label>
           <select id="s-pgto">
             <option value="pago">✅ Pago</option>
             <option value="apagar">🕐 A Pagar</option>
-            <option value="parcial">⚠️ Parcial</option>
+            <option value="parcial">⚠️ Pago Parcialmente</option>
           </select>
         </div>
       </div>
+
+      <div class="fg fcol" id="divValorPago" style="display:none">
+        <label>Valor Já Pago (R$)</label>
+        <input type="number" id="s-valorPago" placeholder="0,00" step=".01" min="0"/>
+      </div>
+
+      <div class="form-divider" data-label="📍 Local & Observações"></div>
       <div class="fg fcol"><label>Local da Casa</label>
         <select id="s-local">
           <option value="">Selecione ou deixe em branco</option>
@@ -488,7 +514,7 @@ canvas{max-height:240px;}
       </div>
       <div class="tbl-wrap">
         <table><thead><tr>
-          <th>Descrição</th><th>Empresa</th><th>Pedreiro</th><th>Local</th><th>Valor</th><th>Instalação</th><th>Pagamento</th><th>Data</th><th>Ações</th>
+          <th>Descrição</th><th>Empresa</th><th>Pedreiro</th><th>Local</th><th>Valor Total</th><th>Pago</th><th>Instalação</th><th>Pagamento</th><th>Data</th><th>Ações</th>
         </tr></thead><tbody id="tServ"></tbody></table>
       </div>
       <div class="btn-row" style="padding:14px 18px">
@@ -554,13 +580,12 @@ canvas{max-height:240px;}
       <div class="fg fcol"><label>Material / Item *</label><input id="c-material" placeholder="Ex: Tinta acrílica branca"/></div>
       <div class="fg fcol"><label>Marca</label><input id="c-marca" placeholder="Ex: Suvinil"/></div>
       <div class="fg fcol"><label>Loja / Fornecedor *</label><input id="c-loja" placeholder="Ex: Casa do Construtor"/></div>
+      
+      <div class="form-divider" data-label="📊 Quantidade Necessária"></div>
       <div class="frow">
-        <div class="fg"><label>Valor (R$) *</label><input type="number" id="c-valor" placeholder="0,00" step=".01" min="0"/></div>
-        <div class="fg"><label>Quantidade</label><input type="number" id="c-qtd" placeholder="1" step=".01" min="0" value="1"/></div>
-      </div>
-      <div class="frow">
-        <div class="fg"><label>Unidade</label>
-          <select id="c-unidade">
+        <div class="fg"><label>Qtd Necessária *</label><input type="number" id="c-qtdNecessaria" placeholder="0" step=".01" min="0"/></div>
+        <div class="fg"><label>Unidade *</label>
+          <select id="c-unidadeNecessaria">
             <option value="un">Unidade</option><option value="dz">Dúzia</option>
             <option value="m2">m²</option><option value="m3">m³</option>
             <option value="ml">Metro Linear</option><option value="kg">Kg</option>
@@ -569,6 +594,26 @@ canvas{max-height:240px;}
             <option value="bd">Balde</option><option value="rl">Rolo</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-divider" data-label="🛍️ Quantidade Comprada"></div>
+      <div class="frow">
+        <div class="fg"><label>Qtd Comprada</label><input type="number" id="c-qtdComprada" placeholder="0" step=".01" min="0" value="0"/></div>
+        <div class="fg"><label>Unidade</label>
+          <select id="c-unidadeComprada">
+            <option value="un">Unidade</option><option value="dz">Dúzia</option>
+            <option value="m2">m²</option><option value="m3">m³</option>
+            <option value="ml">Metro Linear</option><option value="kg">Kg</option>
+            <option value="sc">Saco</option><option value="cx">Caixa</option>
+            <option value="lt">Litro</option><option value="pc">Peça</option>
+            <option value="bd">Balde</option><option value="rl">Rolo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-divider" data-label="💰 Valor & Status"></div>
+      <div class="frow">
+        <div class="fg"><label>Valor (R$) *</label><input type="number" id="c-valor" placeholder="0,00" step=".01" min="0"/></div>
         <div class="fg"><label>Status da Compra</label>
           <select id="c-status">
             <option value="comprado">✅ Comprado</option>
@@ -577,6 +622,7 @@ canvas{max-height:240px;}
           </select>
         </div>
       </div>
+
       <div class="fg fcol"><label>Local de Destino</label>
         <select id="c-local">
           <option value="">Geral / Sem destino</option>
@@ -613,7 +659,7 @@ canvas{max-height:240px;}
 
       <div class="tbl-wrap">
         <table><thead><tr>
-          <th>Material / Marca</th><th>Loja</th><th>Qtd</th><th>Valor</th><th>Local</th><th>Status</th><th>Data</th><th>Ações</th>
+          <th>Material / Marca</th><th>Loja</th><th>Necessária</th><th>Comprada</th><th>Valor</th><th>Local</th><th>Status</th><th>Data</th><th>Ações</th>
         </tr></thead><tbody id="tComp"></tbody></table>
       </div>
       <div class="btn-row" style="padding:14px 18px">
@@ -646,13 +692,13 @@ const DB = {
   compras:[]
 };
 
-let LOJA_ATIVA = localStorage.getItem('lojaAtiva7') || '';
+let LOJA_ATIVA = localStorage.getItem('lojaAtiva71') || '';
 
 const UL = {un:'un',dz:'dz',m2:'m²',m3:'m³',ml:'ml',kg:'kg',sc:'sc',cx:'cx',lt:'lt',pc:'pc',bd:'bd',rl:'rl'};
 const UN_LABEL = {un:'Unidade',dz:'Dúzia',m2:'m²',m3:'m³',ml:'Metro Linear',kg:'Kg',sc:'Saco',cx:'Caixa',lt:'Litro',pc:'Peça',bd:'Balde',rl:'Rolo'};
 
-let WEB_APP = localStorage.getItem('wp7')  || '';
-let SHEET_ID= localStorage.getItem('sid7') || '1mTrzGNHt0rPxf-uNabcHHCe4p5MnT2Cy6_thMM77xOQ';
+let WEB_APP = localStorage.getItem('wp71')  || '';
+let SHEET_ID= localStorage.getItem('sid71') || '1mTrzGNHt0rPxf-uNabcHHCe4p5MnT2Cy6_thMM77xOQ';
 let syncTimer = null;
 let charts = {};
 
@@ -665,7 +711,7 @@ const STATUS_LOCAL = {
 const STATUS_PGTO = {
   pago:{lbl:'Pago',cls:'badge-green'},
   apagar:{lbl:'A Pagar',cls:'badge-red'},
-  parcial:{lbl:'Parcial',cls:'badge-gold'}
+  parcial:{lbl:'Pago Parcial',cls:'badge-gold'}
 };
 const STATUS_INST = {
   sim:{lbl:'Com instalação',cls:'badge-blue'},
@@ -685,6 +731,7 @@ window.onload = ()=>{
   carregar();
   renderAll();
   atualizarBarraLoja();
+  setupPgtoListener();
   if(WEB_APP){ iniciarSync(); syncNow(); }
   else{ setSyncStatus('off','Sheets não configurado'); }
 };
@@ -693,11 +740,11 @@ function $(id){ return document.getElementById(id); }
 
 function carregar(){
   ['materiais','servicos','locais','compras'].forEach(k=>{
-    const d = localStorage.getItem('cpro7_'+k);
+    const d = localStorage.getItem('cpro71_'+k);
     if(d) try{ DB[k]=JSON.parse(d); }catch(e){}
   });
 }
-function salvarLS(k){ localStorage.setItem('cpro7_'+k,JSON.stringify(DB[k])); }
+function salvarLS(k){ localStorage.setItem('cpro71_'+k,JSON.stringify(DB[k])); }
 
 function renderAll(){
   renderMat(); renderServ(); renderLoc(); renderComp();
@@ -711,7 +758,7 @@ function confirmarLojaAtiva(){
   const loja = $('inputLojaAtiva').value.trim();
   if(!loja){toast('Digite o nome da loja.','e');return;}
   LOJA_ATIVA = loja;
-  localStorage.setItem('lojaAtiva7',LOJA_ATIVA);
+  localStorage.setItem('lojaAtiva71',LOJA_ATIVA);
   $('mDefinirLoja').classList.remove('open');
   atualizarBarraLoja();
   $('m-loja').value = LOJA_ATIVA;
@@ -725,7 +772,7 @@ function trocarLoja(){
 
 function desativarLoja(){
   LOJA_ATIVA = '';
-  localStorage.removeItem('lojaAtiva7');
+  localStorage.removeItem('lojaAtiva71');
   atualizarBarraLoja();
   $('m-loja').value = '';
   toast('Loja desativada.','i');
@@ -751,6 +798,16 @@ function atualizarBarraLoja(){
 }
 
 // ══════════════════════════════════════════════════════════
+// LISTENER PARA MOSTRAR CAMPO VALOR PAGO
+// ══════════════════════════════════════════════════════════
+function setupPgtoListener(){
+  $('s-pgto').addEventListener('change',()=>{
+    const val = $('s-pgto').value;
+    $('divValorPago').style.display = val==='parcial'?'block':'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════════
 // NAVEGAÇÃO
 // ══════════════════════════════════════════════════════════
 function mudarAba(aba, btn){
@@ -762,22 +819,30 @@ function mudarAba(aba, btn){
 }
 
 // ══════════════════════════════════════════════════════════
-// STATS
+// STATS (Total Geral = Materiais + Serviços Pago/Parcial + Compras Compradas)
 // ══════════════════════════════════════════════════════════
 function atualizarStats(){
   const totMat  = DB.materiais.reduce((a,i)=>a+i.valor,0);
-  const totServ = DB.servicos.reduce((a,i)=>a+i.valor,0);
-  const totComp = DB.compras.reduce((a,i)=>a+i.valor,0);
+  
+  // Serviços: só conta pago e parcial
+  const servPago = DB.servicos.filter(s=>s.pgto==='pago').reduce((a,i)=>a+i.valor,0);
+  const servParcial = DB.servicos.filter(s=>s.pgto==='parcial').reduce((a,i)=>a+(i.valorPago||0),0);
+  const totServ = servPago + servParcial;
+  const servPagar = DB.servicos.filter(s=>s.pgto==='apagar').reduce((a,i)=>a+i.valor,0);
+  
+  // Compras: só conta comprado
+  const compComprado = DB.compras.filter(c=>c.status==='comprado').reduce((a,i)=>a+i.valor,0);
+  const totComp = compComprado;
+
   const totalGeral = totMat + totServ + totComp;
-  const servPagar  = DB.servicos.filter(s=>s.pgto==='apagar').reduce((a,i)=>a+i.valor,0);
 
   $('statsRow').innerHTML = `
     <div class="stat g"><div class="stat-lbl">📦 Materiais</div><div class="stat-val">${DB.materiais.length}</div></div>
-    <div class="stat pu"><div class="stat-lbl">🔧 Serviços</div><div class="stat-val">R$ ${fmt(totServ)}</div></div>
+    <div class="stat pu"><div class="stat-lbl">🔧 Serviços Pagos</div><div class="stat-val">R$ ${fmt(totServ)}</div><div class="stat-info">Pago + Parcial</div></div>
     <div class="stat re"><div class="stat-lbl">⚠️ A Pagar</div><div class="stat-val">R$ ${fmt(servPagar)}</div></div>
-    <div class="stat bl"><div class="stat-lbl">🛒 Compras</div><div class="stat-val">R$ ${fmt(totComp)}</div></div>
+    <div class="stat bl"><div class="stat-lbl">🛒 Compras Feitas</div><div class="stat-val">R$ ${fmt(totComp)}</div></div>
     <div class="stat gr"><div class="stat-lbl">🏠 Locais</div><div class="stat-val">${DB.locais.length}</div></div>
-    <div class="stat or"><div class="stat-lbl">💰 Total Geral</div><div class="stat-val">R$ ${fmt(totalGeral)}</div></div>
+    <div class="stat or"><div class="stat-lbl">💰 Total Gasto Real</div><div class="stat-val">R$ ${fmt(totalGeral)}</div><div class="stat-info">Mat + Serv Pago + Comprado</div></div>
   `;
 }
 
@@ -988,15 +1053,17 @@ function salvarServico(){
   const data       = $('s-data').value;
   const instalacao = $('s-instalacao').value;
   const pgto       = $('s-pgto').value;
+  const valorPago  = pgto==='parcial' ? parseFloat($('s-valorPago').value)||0 : (pgto==='pago'?valor:0);
   const localId    = $('s-local').value;
   const obs        = $('s-obs').value.trim();
   const editId     = $('s-editId').value;
 
   if(!descricao||!empresa||isNaN(valor)){toast('Preencha Descrição, Empresa e Valor.','e');return;}
+  if(pgto==='parcial' && valorPago<=0){toast('Informe o valor pago parcialmente.','e');return;}
 
   const localNome = localId ? (DB.locais.find(l=>l.id===localId)||{}).nome||'' : '';
 
-  const obj = {id:editId||uid(),descricao,empresa,pedreiro,valor,data,instalacao,pgto,localId,localNome,obs,updatedAt:now()};
+  const obj = {id:editId||uid(),descricao,empresa,pedreiro,valor,valorPago,data,instalacao,pgto,localId,localNome,obs,updatedAt:now()};
   if(!editId) obj.createdAt=now();
 
   if(editId){
@@ -1012,8 +1079,9 @@ function salvarServico(){
 }
 
 function cancelarServ(){
-  ['s-descricao','s-empresa','s-pedreiro','s-valor','s-data','s-obs'].forEach(id=>$(id).value='');
+  ['s-descricao','s-empresa','s-pedreiro','s-valor','s-valorPago','s-data','s-obs'].forEach(id=>$(id).value='');
   $('s-instalacao').value='sim'; $('s-pgto').value='apagar'; $('s-local').value=''; $('s-editId').value='';
+  $('divValorPago').style.display='none';
   $('servFormTitle').textContent='Novo Serviço';
 }
 
@@ -1022,7 +1090,12 @@ function editarServ(id){
   $('s-descricao').value=i.descricao; $('s-empresa').value=i.empresa;
   $('s-pedreiro').value=i.pedreiro||''; $('s-valor').value=i.valor;
   $('s-data').value=i.data||''; $('s-instalacao').value=i.instalacao||'sim';
-  $('s-pgto').value=i.pgto||'apagar'; $('s-local').value=i.localId||'';
+  $('s-pgto').value=i.pgto||'apagar'; 
+  if(i.pgto==='parcial'){
+    $('s-valorPago').value=i.valorPago||0;
+    $('divValorPago').style.display='block';
+  }
+  $('s-local').value=i.localId||'';
   $('s-obs').value=i.obs||''; $('s-editId').value=i.id;
   $('servFormTitle').textContent='Editar Serviço';
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1045,17 +1118,19 @@ function renderServ(){
     return(!filtro||txt.includes(filtro))&&(!fPgto||i.pgto===fPgto)&&(!fInst||i.instalacao===fInst);
   });
 
-  if(!it.length){ $('tServ').innerHTML=`<tr><td colspan="9"><div class="no-data"><div class="ico">🔧</div>Nenhum serviço cadastrado</div></td></tr>`; return; }
+  if(!it.length){ $('tServ').innerHTML=`<tr><td colspan="10"><div class="no-data"><div class="ico">🔧</div>Nenhum serviço cadastrado</div></td></tr>`; return; }
 
   $('tServ').innerHTML = it.map(i=>{
     const pgto = STATUS_PGTO[i.pgto]||STATUS_PGTO.apagar;
     const inst = STATUS_INST[i.instalacao]||STATUS_INST.nao;
+    const pagoTxt = i.pgto==='parcial' ? `R$ ${fmt(i.valorPago||0)}` : (i.pgto==='pago'?`R$ ${fmt(i.valor)}`:'R$ 0,00');
     return `<tr>
       <td><div style="font-weight:600">${i.descricao}</div>${i.obs?`<div style="font-size:.73rem;color:var(--muted)">${i.obs}</div>`:''}</td>
       <td>${i.empresa}</td>
       <td>${i.pedreiro||'—'}</td>
       <td>${i.localNome||'—'}</td>
       <td style="font-weight:700;color:var(--gold)">R$ ${fmt(i.valor)}</td>
+      <td style="font-weight:600;color:var(--green)">${pagoTxt}</td>
       <td><span class="badge ${inst.cls}">${inst.lbl}</span></td>
       <td><span class="badge ${pgto.cls}">${pgto.lbl}</span></td>
       <td>${i.data?fmtDate(i.data):'—'}</td>
@@ -1154,26 +1229,34 @@ function renderLoc(){
 }
 
 // ══════════════════════════════════════════════════════════
-// ██ COMPRAS
+// ██ COMPRAS (COM QUANTIDADE NECESSÁRIA E COMPRADA)
 // ══════════════════════════════════════════════════════════
 function salvarCompra(){
   const material = $('c-material').value.trim();
   const marca    = $('c-marca').value.trim();
   const loja     = $('c-loja').value.trim();
   const valor    = parseFloat($('c-valor').value);
-  const qtd      = parseFloat($('c-qtd').value)||1;
-  const unidade  = $('c-unidade').value;
+  
+  const qtdNecessaria     = parseFloat($('c-qtdNecessaria').value)||0;
+  const unidadeNecessaria = $('c-unidadeNecessaria').value;
+  const qtdComprada       = parseFloat($('c-qtdComprada').value)||0;
+  const unidadeComprada   = $('c-unidadeComprada').value;
+  
   const status   = $('c-status').value;
   const localId  = $('c-local').value;
   const data     = $('c-data').value;
   const obs      = $('c-obs').value.trim();
   const editId   = $('c-editId').value;
 
-  if(!material||!loja||isNaN(valor)){toast('Preencha Material, Loja e Valor.','e');return;}
+  if(!material||!loja||isNaN(valor)||qtdNecessaria<=0){toast('Preencha Material, Loja, Valor e Qtd Necessária.','e');return;}
 
   const localNome = localId ? (DB.locais.find(l=>l.id===localId)||{}).nome||'' : '';
 
-  const obj={id:editId||uid(),material,marca,loja,valor,qtd,unidade,status,localId,localNome,data,obs,updatedAt:now()};
+  const obj={
+    id:editId||uid(),material,marca,loja,valor,
+    qtdNecessaria,unidadeNecessaria,qtdComprada,unidadeComprada,
+    status,localId,localNome,data,obs,updatedAt:now()
+  };
   if(!editId) obj.createdAt=now();
 
   if(editId){
@@ -1189,8 +1272,10 @@ function salvarCompra(){
 }
 
 function cancelarComp(){
-  ['c-material','c-marca','c-loja','c-valor','c-data','c-obs'].forEach(id=>$(id).value='');
-  $('c-qtd').value='1'; $('c-unidade').value='un'; $('c-status').value='pendente'; $('c-local').value=''; $('c-editId').value='';
+  ['c-material','c-marca','c-loja','c-valor','c-qtdNecessaria','c-qtdComprada','c-data','c-obs'].forEach(id=>$(id).value='');
+  $('c-unidadeNecessaria').value='un'; $('c-unidadeComprada').value='un';
+  $('c-qtdComprada').value='0';
+  $('c-status').value='pendente'; $('c-local').value=''; $('c-editId').value='';
   $('compFormTitle').textContent='Nova Compra';
 }
 
@@ -1198,7 +1283,8 @@ function editarComp(id){
   const i=DB.compras.find(x=>x.id===id); if(!i)return;
   $('c-material').value=i.material; $('c-marca').value=i.marca||'';
   $('c-loja').value=i.loja; $('c-valor').value=i.valor;
-  $('c-qtd').value=i.qtd||1; $('c-unidade').value=i.unidade||'un';
+  $('c-qtdNecessaria').value=i.qtdNecessaria||0; $('c-unidadeNecessaria').value=i.unidadeNecessaria||'un';
+  $('c-qtdComprada').value=i.qtdComprada||0; $('c-unidadeComprada').value=i.unidadeComprada||'un';
   $('c-status').value=i.status||'pendente'; $('c-local').value=i.localId||'';
   $('c-data').value=i.data||''; $('c-obs').value=i.obs||''; $('c-editId').value=i.id;
   $('compFormTitle').textContent='Editar Compra';
@@ -1230,16 +1316,21 @@ function renderComp(){
   $('tot-orcamento').textContent='R$ '+fmt(tots.orcamento);
   $('tot-geral').textContent='R$ '+fmt(tots.comprado+tots.pendente+tots.orcamento);
 
-  if(!it.length){ $('tComp').innerHTML=`<tr><td colspan="8"><div class="no-data"><div class="ico">🛒</div>Nenhuma compra registrada</div></td></tr>`; return; }
+  if(!it.length){ $('tComp').innerHTML=`<tr><td colspan="9"><div class="no-data"><div class="ico">🛒</div>Nenhuma compra registrada</div></td></tr>`; return; }
 
   $('tComp').innerHTML = it.map(i=>{
     const st = STATUS_COMP[i.status]||STATUS_COMP.pendente;
-    const qtlbl = i.unidade==='dz'?`${i.qtd}dz`:`${i.qtd} ${UL[i.unidade]||i.unidade}`;
+    const necLbl = `${i.qtdNecessaria} ${UL[i.unidadeNecessaria]||i.unidadeNecessaria}`;
+    const compLbl = i.qtdComprada>0 ? `${i.qtdComprada} ${UL[i.unidadeComprada]||i.unidadeComprada}` : '—';
+    const falta = i.qtdNecessaria - (i.unidadeNecessaria===i.unidadeComprada ? i.qtdComprada : 0);
+    const faltaInfo = falta>0 && i.unidadeNecessaria===i.unidadeComprada ? `<br><span style="font-size:.7rem;color:var(--red)">Falta: ${falta.toFixed(2)}</span>` : '';
+    
     return `<tr>
       <td><div style="font-weight:600">${i.material}</div>
           ${i.marca?`<span class="badge badge-gold">${i.marca}</span>`:''}</td>
       <td>${i.loja}</td>
-      <td>${qtlbl}</td>
+      <td>${necLbl}</td>
+      <td>${compLbl}${faltaInfo}</td>
       <td style="font-weight:700">R$ ${fmt(i.valor)}</td>
       <td>${i.localNome||'—'}</td>
       <td><span class="badge ${st.cls}">${st.lbl}</span></td>
@@ -1271,8 +1362,8 @@ function renderDash(){
   destroyChart('servPgto');
   const pago=DB.servicos.filter(s=>s.pgto==='pago').reduce((a,i)=>a+i.valor,0);
   const apagar=DB.servicos.filter(s=>s.pgto==='apagar').reduce((a,i)=>a+i.valor,0);
-  const parcial=DB.servicos.filter(s=>s.pgto==='parcial').reduce((a,i)=>a+i.valor,0);
-  charts.servPgto=new Chart($('ch-servPgto'),{type:'doughnut',data:{labels:['Pago','A Pagar','Parcial'],datasets:[{data:[pago,apagar,parcial],backgroundColor:['#10b981','#ef4444','#f59e0b'],borderWidth:0}]},
+  const parcial=DB.servicos.filter(s=>s.pgto==='parcial').reduce((a,i)=>a+(i.valorPago||0),0);
+  charts.servPgto=new Chart($('ch-servPgto'),{type:'doughnut',data:{labels:['Pago','A Pagar','Pago Parcial'],datasets:[{data:[pago,apagar,parcial],backgroundColor:['#10b981','#ef4444','#f59e0b'],borderWidth:0}]},
     options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}}}});
 
   // Progresso por local
@@ -1302,14 +1393,16 @@ function renderDash(){
       options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8',callback:v=>'R$'+v},grid:{color:'#272d40'}},y:{ticks:{color:'#94a3b8'},grid:{display:false}}}}});
   }
 
-  // Resumo financeiro
+  // Resumo financeiro (apenas pago/comprado)
   destroyChart('financeiro');
   const totM=DB.materiais.reduce((a,i)=>a+i.valor,0);
-  const totS=DB.servicos.reduce((a,i)=>a+i.valor,0);
-  const totC=DB.compras.reduce((a,i)=>a+i.valor,0);
+  const servPago2=DB.servicos.filter(s=>s.pgto==='pago').reduce((a,i)=>a+i.valor,0);
+  const servParc2=DB.servicos.filter(s=>s.pgto==='parcial').reduce((a,i)=>a+(i.valorPago||0),0);
+  const totS=servPago2+servParc2;
+  const totC=DB.compras.filter(c=>c.status==='comprado').reduce((a,i)=>a+i.valor,0);
   charts.financeiro=new Chart($('ch-financeiro'),{type:'bar',
-    data:{labels:['Materiais Cadastrados','Serviços','Compras (Pendente)','Total Geral'],
-    datasets:[{data:[totM,totS,pend,totM+totS+totC],backgroundColor:['#f59e0b99','#8b5cf699','#ef444499','#10b98199'],borderColor:['#f59e0b','#8b5cf6','#ef4444','#10b981'],borderWidth:1.5,borderRadius:8}]},
+    data:{labels:['Materiais','Serviços Pagos','Compras Feitas','Total Gasto Real'],
+    datasets:[{data:[totM,totS,totC,totM+totS+totC],backgroundColor:['#f59e0b99','#8b5cf699','#3b82f699','#10b98199'],borderColor:['#f59e0b','#8b5cf6','#3b82f6','#10b981'],borderWidth:1.5,borderRadius:8}]},
     options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{display:false}},y:{ticks:{color:'#94a3b8',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#272d40'}}}}});
 }
 
@@ -1321,9 +1414,9 @@ function exportar(modulo){
   if(modulo==='materiais'){
     rows=DB.materiais.map(i=>({'Material':i.material,'Marca':i.marca||'','Loja':i.loja,'Qtd':i.qtd,'Unidade':UN_LABEL[i.unidade]||i.unidade,'Valor Total':i.valor,'Valor Unit.':+i.vu.toFixed(4)}));
   } else if(modulo==='servicos'){
-    rows=DB.servicos.map(i=>({'Descrição':i.descricao,'Empresa':i.empresa,'Pedreiro':i.pedreiro||'','Local':i.localNome||'','Valor':i.valor,'Instalação':i.instalacao,'Pagamento':i.pgto,'Data':i.data,'Obs':i.obs||''}));
+    rows=DB.servicos.map(i=>({'Descrição':i.descricao,'Empresa':i.empresa,'Pedreiro':i.pedreiro||'','Local':i.localNome||'','Valor Total':i.valor,'Valor Pago':i.valorPago||0,'Instalação':i.instalacao,'Pagamento':i.pgto,'Data':i.data,'Obs':i.obs||''}));
   } else if(modulo==='compras'){
-    rows=DB.compras.map(i=>({'Material':i.material,'Marca':i.marca||'','Loja':i.loja,'Qtd':i.qtd,'Unidade':UN_LABEL[i.unidade]||i.unidade,'Valor':i.valor,'Local':i.localNome||'','Status':i.status,'Data':i.data,'Obs':i.obs||''}));
+    rows=DB.compras.map(i=>({'Material':i.material,'Marca':i.marca||'','Loja':i.loja,'Qtd Necessária':i.qtdNecessaria,'Un. Necessária':UN_LABEL[i.unidadeNecessaria]||i.unidadeNecessaria,'Qtd Comprada':i.qtdComprada,'Un. Comprada':UN_LABEL[i.unidadeComprada]||i.unidadeComprada,'Valor':i.valor,'Local':i.localNome||'','Status':i.status,'Data':i.data,'Obs':i.obs||''}));
   }
   if(!rows.length){toast('Nenhum dado para exportar.','e');return;}
 
@@ -1344,7 +1437,7 @@ async function gerarPDF(){
   if(!DB.materiais.length){toast('Nenhum material para PDF.','e');return;}
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'landscape'});
-  doc.setFontSize(14); doc.text('Construção PRO 7.0 — Materiais',14,14);
+  doc.setFontSize(14); doc.text('Construção PRO 7.1 — Materiais',14,14);
   doc.setFontSize(8); doc.text('Gerado: '+new Date().toLocaleString('pt-BR'),14,20);
   const ths=['Material','Marca','Loja','Qtd','Valor Total','Valor Unit.'];
   const cs=[14,55,80,120,148,175];
@@ -1365,8 +1458,8 @@ async function gerarPDF(){
 function salvarConfig(){
   WEB_APP = $('mWebApp').value.trim();
   SHEET_ID= $('mSheetId').value.trim();
-  localStorage.setItem('wp7',WEB_APP);
-  localStorage.setItem('sid7',SHEET_ID);
+  localStorage.setItem('wp71',WEB_APP);
+  localStorage.setItem('sid71',SHEET_ID);
   $('mConfig').classList.remove('open');
   if(WEB_APP){ toast('Conectando ao Google Sheets...','i'); iniciarSync(); syncNow(); }
   else{ setSyncStatus('off','Sheets não configurado'); }
