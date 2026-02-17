@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construção PRO 6.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0c0e14;--s1:#151821;--s2:#1d2130;--s3:#252a3a;
+  --gold:#f59e0b;--green:#10b981;--blue:#3b82f6;--red:#ef4444;--purple:#8b5cf6;--orange:#f97316;
+  --text:#f1f5f9;--muted:#64748b;--border:#272d40;--radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px;}
+
+/* ── HEADER ── */
+.header{
+  text-align:center;padding:36px 24px 28px;margin-bottom:20px;
+  background:linear-gradient(135deg,var(--s1),var(--s2));
+  border:1px solid var(--border);border-radius:20px;
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 50%,rgba(245,158,11,.07),transparent 60%),
+             radial-gradient(ellipse at 70% 30%,rgba(59,130,246,.05),transparent 55%);
+}
+.header h1{
+  font-family:'Syne',sans-serif;font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;
+  background:linear-gradient(90deg,var(--gold),#fde68a 60%,var(--orange));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-1px;position:relative;
+}
+.header p{color:var(--muted);margin-top:6px;font-size:.9rem;position:relative;}
+
+/* ── SYNC BAR ── */
+.sync-bar{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px 18px;margin-bottom:20px;
+}
+.sync-status{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+.dot.off{background:var(--red);animation:none!important;}
+.dot.sync{background:var(--gold);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.dot{animation:blink 2s infinite;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:5px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{
+  flex:1;min-width:120px;padding:10px 14px;border-radius:8px;border:none;
+  background:transparent;color:var(--muted);cursor:pointer;
+  font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.4px;
+  transition:all .2s;text-align:center;white-space:nowrap;
+}
+.tab.active{background:var(--s3);color:var(--text);}
+.tab.active.t-mat{color:var(--gold);}
+.tab.active.t-serv{color:var(--purple);}
+.tab.active.t-local{color:var(--green);}
+.tab.active.t-comp{color:var(--blue);}
+.tab.active.t-dash{color:var(--orange);}
+.tab-icon{margin-right:5px;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.card-header{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.card-body{padding:18px 22px;}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;}
+.stat{
+  background:var(--s1);border:1px solid var(--border);border-radius:12px;
+  padding:16px;position:relative;overflow:hidden;
+}
+.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 12px 12px;}
+.stat.g::after{background:var(--gold);}
+.stat.gr::after{background:var(--green);}
+.stat.bl::after{background:var(--blue);}
+.stat.pu::after{background:var(--purple);}
+.stat.or::after{background:var(--orange);}
+.stat.re::after{background:var(--red);}
+.stat-lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:500;}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;margin-top:3px;}
+
+/* ── FORM ── */
+.form-section{display:none;}
+.form-section.active{display:block;}
+.page-grid{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start;}
+@media(max-width:900px){.page-grid{grid-template-columns:1fr;}}
+.form-card{position:sticky;top:16px;}
+.form-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.fg label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:500;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.fcol{grid-column:1/-1;}
+input,select,textarea{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:9px 12px;font-size:.88rem;
+  font-family:'DM Sans',sans-serif;transition:border .18s,box-shadow .18s;width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,158,11,.12);}
+select option{background:var(--s2);}
+textarea{resize:vertical;min-height:60px;}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.4px;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-gold{background:var(--gold);color:#0c0e14;width:100%;justify-content:center;padding:12px;}
+.btn-gold:hover{background:#fde68a;transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,158,11,.35);}
+.btn-ghost{background:var(--s2);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-red{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.btn-red:hover{background:rgba(239,68,68,.22);}
+.btn-green{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+.btn-green:hover{background:rgba(16,185,129,.22);}
+.btn-sm{padding:5px 10px;font-size:.72rem;border-radius:6px;}
+.btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);width:100%;justify-content:center;padding:9px;margin-top:6px;}
+.btn-cancel:hover{color:var(--red);border-color:var(--red);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+thead{background:var(--s2);}
+th{padding:11px 13px;text-align:left;font-family:'Syne',sans-serif;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);white-space:nowrap;}
+td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,.02);}
+.no-data{text-align:center;padding:44px 20px;color:var(--muted);}
+.no-data .ico{font-size:2.5rem;margin-bottom:10px;opacity:.4;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap;}
+.badge-gold{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3);}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3);}
+.badge-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3);}
+.badge-purple{background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3);}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3);}
+.badge-gray{background:rgba(100,116,139,.12);color:var(--muted);border:1px solid rgba(100,116,139,.2);}
+
+/* ── PROGRESS ── */
+.progress{background:var(--s3);border-radius:20px;height:6px;overflow:hidden;}
+.progress-bar{height:100%;border-radius:20px;transition:width .4s;}
+
+/* ── FILTER ROW ── */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;padding:14px 22px;background:var(--s2);border-bottom:1px solid var(--border);}
+.filter-row input,.filter-row select{flex:1;min-width:160px;background:var(--s1);}
+
+/* ── TOAST ── */
+.toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+.toast{
+  background:var(--s1);border:1px solid var(--border);border-radius:10px;
+  padding:11px 16px;font-size:.83rem;display:flex;align-items:center;gap:9px;
+  animation:tIn .25s ease;max-width:310px;box-shadow:0 8px 28px rgba(0,0,0,.35);
+}
+.toast.s{border-left:3px solid var(--green);}
+.toast.e{border-left:3px solid var(--red);}
+.toast.i{border-left:3px solid var(--gold);}
+@keyframes tIn{from{transform:translateX(110%);opacity:0;}to{transform:none;opacity:1;}}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:16px;}
+.overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:26px;width:100%;max-width:480px;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.modal h3{font-family:'Syne',sans-serif;font-size:1.05rem;margin-bottom:16px;}
+.modal-btns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+@media(max-width:760px){.dash-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.chart-card h4{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;}
+canvas{max-height:240px;}
+
+/* ── LOCAL CARDS ── */
+.locais-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:18px 22px;}
+.local-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;
+  transition:border-color .2s;cursor:default;
+}
+.local-card:hover{border-color:var(--green);}
+.local-card .lc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.local-card .lc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+.local-card .lc-meta{font-size:.78rem;color:var(--muted);margin-bottom:8px;}
+.local-card .lc-actions{display:flex;gap:6px;margin-top:12px;}
+</style>
+</head>
+<body>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- MODAL CONFIG -->
+<div class="overlay" id="mConfig">
+  <div class="modal">
+    <h3>⚙️ Configurar Google Sheets</h3>
+    <div class="fg"><label>ID da Planilha</label>
+      <input id="mSheetId" value="1mTrzGNHt0rPxf-uNabcHHCe4p5MnT2Cy6_thMM77xOQ" placeholder="ID da planilha..."/>
+    </div>
+    <div class="fg"><label>URL do Web App (Apps Script)</label>
+      <input id="mWebApp" placeholder="https://script.google.com/macros/s/..."/>
+    </div>
+    <p style="font-size:.75rem;color:var(--muted);margin-top:8px">A sincronização ocorre automaticamente a cada 30 segundos após conectar.</p>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="$('mConfig').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-gold" style="width:auto;padding:9px 20px" onclick="salvarConfig()">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<div class="header">
+  <h1>🧱 Construção PRO 6.0</h1>
+  <p>Materiais · Serviços · Locais · Compras · Google Sheets em tempo real</p>
+</div>
+
+<!-- SYNC BAR -->
+<div class="sync-bar">
+  <div class="sync-status">
+    <div class="dot off" id="syncDot"></div>
+    <span id="syncTxt">Não conectado</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="$('mConfig').classList.add('open')">⚙️ Configurar Sheets</button>
+    <button class="btn btn-ghost btn-sm" onclick="syncNow()">🔄 Sincronizar</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" id="statsRow"></div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab t-mat active" onclick="mudarAba('materiais',this)"><span class="tab-icon">📦</span>Materiais</button>
+  <button class="tab t-serv" onclick="mudarAba('servicos',this)"><span class="tab-icon">🔧</span>Serviços</button>
+  <button class="tab t-local" onclick="mudarAba('locais',this)"><span class="tab-icon">🏠</span>Locais</button>
+  <button class="tab t-comp" onclick="mudarAba('compras',this)"><span class="tab-icon">🛒</span>Compras</button>
+  <button class="tab t-dash" onclick="mudarAba('dashboard',this)"><span class="tab-icon">📊</span>Dashboard</button>
+</div>
+
+<!-- ══════════════════════════════════════════════ ABA: MATERIAIS -->
+<div class="form-section active" id="sec-materiais">
+  <div class="page-grid">
+    <div class="card form-card"><div class="card-body">
+      <div class="form-title">📦 <span id="matFormTitle">Novo Material</span></div>
+      <div class="fg fcol"><label>Material *</label><input id="m-material" placeholder="Ex: Cimento CP-II"/></div>
+      <div class="fg fcol"><label>Marca</label><input id="m-marca" placeholder="Ex: Votorantim"/></div>
+      <div class="fg fcol"><label>Loja *</label><input id="m-loja" placeholder="Ex: Leroy Merlin"/></div>
+      <div class="frow">
+        <div class="fg"><label>Valor Total (R$) *</label><input type="number" id="m-valor" placeholder="0,00" step=".01" min="0"/></div>
+        <div class="fg"><label>Quantidade *</label><input type="number" id="m-qtd" placeholder="1" step=".01" min="0"/></div>
+      </div>
+      <div class="fg fcol"><label>Unidade</label>
+        <select id="m-unidade">
+          <option value="un">Unidade (un)</option>
+          <option value="dz">Dúzia (dz)</option>
+          <option value="m2">Metro Quadrado (m²)</option>
+          <option value="m3">Metro Cúbico (m³)</option>
+          <option value="ml">Metro Linear (ml)</option>
+          <option value="kg">Quilograma (kg)</option>
+          <option value="sc">Saco (sc)</option>
+          <option value="cx">Caixa (cx)</option>
+          <option value="lt">Litro (lt)</option>
+          <option value="pc">Peça (pc)</option>
+          <option value="bd">Balde (bd)</option>
+          <option value="rl">Rolo (rl)</option>
+        </select>
+      </div>
+      <input type="hidden" id="m-editId"/>
+      <button class="btn btn-gold" style="margin-top:8px" onclick="salvarMaterial()">💾 Salvar Material</button>
+      <button class="btn btn-cancel" onclick="cancelarMat()">✕ Cancelar</button>
+    </div></div>
+
+    <div class="card">
+      <div class="filter-row">
+        <input id="m-filtro" placeholder="🔍 Filtrar..." oninput="renderMat()"/>
+        <select id="m-fLoja" onchange="renderMat()"><option value="">Todas as lojas</option></select>
+        <select id="m-fUnidade" onchange="renderMat()">
+          <option value="">Todas unidades</option>
+          <option value="un">Unidade</option><option value="dz">Dúzia</option>
+          <option value="m2">m²</option><option value="m3">m³</option>
+          <option value="ml">Metro Linear</option><option value="kg">Kg</option>
+          <option value="sc">Saco</option><option value="cx">Caixa</option>
+          <option value="lt">Litro</option><option value="pc">Peça</option>
+          <option value="bd">Balde</option><option value="rl">Rolo</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Material / Marca</th><th>Loja</th><th>Qtd</th><th>Valor Total</th><th>Valor Unit.</th><th>Ações</th>
+        </tr></thead><tbody id="tMat"></tbody></table>
+      </div>
+      <div class="btn-row" style="padding:14px 18px">
+        <button class="btn btn-ghost btn-sm" onclick="exportar('materiais')">📥 Excel</button>
+        <button class="btn btn-ghost btn-sm" onclick="gerarPDF()">📄 PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ ABA: SERVIÇOS -->
+<div class="form-section" id="sec-servicos">
+  <div class="page-grid">
+    <div class="card form-card"><div class="card-body">
+      <div class="form-title">🔧 <span id="servFormTitle">Novo Serviço</span></div>
+      <div class="fg fcol"><label>Descrição do Serviço *</label><input id="s-descricao" placeholder="Ex: Instalação elétrica sala"/></div>
+      <div class="fg fcol"><label>Empresa / Prestador *</label><input id="s-empresa" placeholder="Ex: Elétrica Silva Ltda"/></div>
+      <div class="fg fcol"><label>Profissional / Pedreiro</label><input id="s-pedreiro" placeholder="Ex: João da Silva"/></div>
+      <div class="frow">
+        <div class="fg"><label>Valor do Serviço (R$) *</label><input type="number" id="s-valor" placeholder="0,00" step=".01" min="0"/></div>
+        <div class="fg"><label>Data Prevista</label><input type="date" id="s-data"/></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Inclui Instalação?</label>
+          <select id="s-instalacao">
+            <option value="sim">Sim — com instalação</option>
+            <option value="nao">Não — somente fornecimento</option>
+            <option value="parcial">Parcial</option>
+          </select>
+        </div>
+        <div class="fg"><label>Status Pagamento</label>
+          <select id="s-pgto">
+            <option value="pago">✅ Pago</option>
+            <option value="apagar">🕐 A Pagar</option>
+            <option value="parcial">⚠️ Parcial</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg fcol"><label>Local da Casa</label>
+        <select id="s-local">
+          <option value="">Selecione ou deixe em branco</option>
+        </select>
+      </div>
+      <div class="fg fcol"><label>Observações</label><textarea id="s-obs" placeholder="Detalhes adicionais..."></textarea></div>
+      <input type="hidden" id="s-editId"/>
+      <button class="btn btn-gold" style="margin-top:8px" onclick="salvarServico()">💾 Salvar Serviço</button>
+      <button class="btn btn-cancel" onclick="cancelarServ()">✕ Cancelar</button>
+    </div></div>
+
+    <div class="card">
+      <div class="filter-row">
+        <input id="s-filtro" placeholder="🔍 Filtrar por empresa, descrição..." oninput="renderServ()"/>
+        <select id="s-fPgto" onchange="renderServ()">
+          <option value="">Todos pagamentos</option>
+          <option value="pago">Pago</option>
+          <option value="apagar">A Pagar</option>
+          <option value="parcial">Parcial</option>
+        </select>
+        <select id="s-fInst" onchange="renderServ()">
+          <option value="">Toda instalação</option>
+          <option value="sim">Com instalação</option>
+          <option value="nao">Sem instalação</option>
+          <option value="parcial">Parcial</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Descrição</th><th>Empresa</th><th>Pedreiro</th><th>Local</th><th>Valor</th><th>Instalação</th><th>Pagamento</th><th>Data</th><th>Ações</th>
+        </tr></thead><tbody id="tServ"></tbody></table>
+      </div>
+      <div class="btn-row" style="padding:14px 18px">
+        <button class="btn btn-ghost btn-sm" onclick="exportar('servicos')">📥 Excel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ ABA: LOCAIS -->
+<div class="form-section" id="sec-locais">
+  <div class="page-grid">
+    <div class="card form-card"><div class="card-body">
+      <div class="form-title">🏠 <span id="locFormTitle">Novo Local</span></div>
+      <div class="fg fcol"><label>Nome do Local *</label><input id="l-nome" placeholder="Ex: Sala, Cozinha, Banheiro 1..."/></div>
+      <div class="fg fcol"><label>Tipo</label>
+        <select id="l-tipo">
+          <option value="sala">Sala</option><option value="cozinha">Cozinha</option>
+          <option value="quarto">Quarto</option><option value="banheiro">Banheiro</option>
+          <option value="area">Área / Varanda</option><option value="garagem">Garagem</option>
+          <option value="quintal">Quintal</option><option value="corredor">Corredor</option>
+          <option value="fachada">Fachada</option><option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="fg fcol"><label>Status da Obra</label>
+        <select id="l-status">
+          <option value="nao_iniciado">🔴 Não Iniciado</option>
+          <option value="em_andamento">🟡 Em Andamento</option>
+          <option value="concluido">🟢 Concluído</option>
+          <option value="pausado">⚪ Pausado</option>
+        </select>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>% Progresso</label><input type="number" id="l-progresso" placeholder="0" min="0" max="100" value="0"/></div>
+        <div class="fg"><label>Prioridade</label>
+          <select id="l-prioridade">
+            <option value="alta">🔴 Alta</option>
+            <option value="media">🟡 Média</option>
+            <option value="baixa">🟢 Baixa</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg fcol"><label>Descrição / Observações</label><textarea id="l-obs" placeholder="Descreva o que será feito..."></textarea></div>
+      <input type="hidden" id="l-editId"/>
+      <button class="btn btn-gold" style="margin-top:8px" onclick="salvarLocal()">💾 Salvar Local</button>
+      <button class="btn btn-cancel" onclick="cancelarLoc()">✕ Cancelar</button>
+    </div></div>
+
+    <div class="card" style="padding:0">
+      <div class="card-header" style="padding:18px 22px"><div class="card-title" style="color:var(--green)">🏠 Cômodos / Locais</div></div>
+      <div class="locais-grid" id="gridLocais">
+        <div class="no-data"><div class="ico">🏠</div>Nenhum local cadastrado</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ ABA: COMPRAS -->
+<div class="form-section" id="sec-compras">
+  <div class="page-grid">
+    <div class="card form-card"><div class="card-body">
+      <div class="form-title">🛒 <span id="compFormTitle">Nova Compra</span></div>
+      <div class="fg fcol"><label>Material / Item *</label><input id="c-material" placeholder="Ex: Tinta acrílica branca"/></div>
+      <div class="fg fcol"><label>Marca</label><input id="c-marca" placeholder="Ex: Suvinil"/></div>
+      <div class="fg fcol"><label>Loja / Fornecedor *</label><input id="c-loja" placeholder="Ex: Casa do Construtor"/></div>
+      <div class="frow">
+        <div class="fg"><label>Valor (R$) *</label><input type="number" id="c-valor" placeholder="0,00" step=".01" min="0"/></div>
+        <div class="fg"><label>Quantidade</label><input type="number" id="c-qtd" placeholder="1" step=".01" min="0" value="1"/></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Unidade</label>
+          <select id="c-unidade">
+            <option value="un">Unidade</option><option value="dz">Dúzia</option>
+            <option value="m2">m²</option><option value="m3">m³</option>
+            <option value="ml">Metro Linear</option><option value="kg">Kg</option>
+            <option value="sc">Saco</option><option value="cx">Caixa</option>
+            <option value="lt">Litro</option><option value="pc">Peça</option>
+            <option value="bd">Balde</option><option value="rl">Rolo</option>
+          </select>
+        </div>
+        <div class="fg"><label>Status da Compra</label>
+          <select id="c-status">
+            <option value="comprado">✅ Comprado</option>
+            <option value="pendente">🕐 A Comprar</option>
+            <option value="orcamento">💬 Em Orçamento</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg fcol"><label>Local de Destino</label>
+        <select id="c-local">
+          <option value="">Geral / Sem destino</option>
+        </select>
+      </div>
+      <div class="fg fcol"><label>Data da Compra</label><input type="date" id="c-data"/></div>
+      <div class="fg fcol"><label>Observações</label><textarea id="c-obs" placeholder="Detalhes, link, contato..."></textarea></div>
+      <input type="hidden" id="c-editId"/>
+      <button class="btn btn-gold" style="margin-top:8px" onclick="salvarCompra()">💾 Salvar Compra</button>
+      <button class="btn btn-cancel" onclick="cancelarComp()">✕ Cancelar</button>
+    </div></div>
+
+    <div class="card">
+      <div class="filter-row">
+        <input id="c-filtro" placeholder="🔍 Filtrar..." oninput="renderComp()"/>
+        <select id="c-fStatus" onchange="renderComp()">
+          <option value="">Todos os status</option>
+          <option value="comprado">Comprado</option>
+          <option value="pendente">A Comprar</option>
+          <option value="orcamento">Em Orçamento</option>
+        </select>
+        <select id="c-fLocal" onchange="renderComp()">
+          <option value="">Todos os locais</option>
+        </select>
+      </div>
+
+      <!-- Totalizadores -->
+      <div style="display:flex;gap:12px;padding:12px 18px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap">
+        <div style="font-size:.78rem;color:var(--muted)">Comprado: <strong id="tot-comprado" style="color:var(--green)">R$ 0,00</strong></div>
+        <div style="font-size:.78rem;color:var(--muted)">A Comprar: <strong id="tot-pendente" style="color:var(--gold)">R$ 0,00</strong></div>
+        <div style="font-size:.78rem;color:var(--muted)">Em Orçamento: <strong id="tot-orcamento" style="color:var(--blue)">R$ 0,00</strong></div>
+        <div style="font-size:.78rem;color:var(--muted)">Total Geral: <strong id="tot-geral" style="color:var(--text)">R$ 0,00</strong></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Material / Marca</th><th>Loja</th><th>Qtd</th><th>Valor</th><th>Local</th><th>Status</th><th>Data</th><th>Ações</th>
+        </tr></thead><tbody id="tComp"></tbody></table>
+      </div>
+      <div class="btn-row" style="padding:14px 18px">
+        <button class="btn btn-ghost btn-sm" onclick="exportar('compras')">📥 Excel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ ABA: DASHBOARD -->
+<div class="form-section" id="sec-dashboard">
+  <div class="dash-grid">
+    <div class="chart-card"><h4>💰 Gastos por Loja (Materiais)</h4><canvas id="ch-lojas"></canvas></div>
+    <div class="chart-card"><h4>🔧 Serviços — Pago vs A Pagar</h4><canvas id="ch-servPgto"></canvas></div>
+    <div class="chart-card"><h4>🏠 Progresso por Local</h4><canvas id="ch-locais"></canvas></div>
+    <div class="chart-card"><h4>🛒 Compras — Comprado vs Pendente</h4><canvas id="ch-compStatus"></canvas></div>
+  </div>
+  <div class="chart-card" style="margin-bottom:16px"><h4>📦 Top Materiais por Valor</h4><canvas id="ch-topMat" style="max-height:200px"></canvas></div>
+  <div class="chart-card"><h4>💸 Resumo Financeiro Total</h4><canvas id="ch-financeiro" style="max-height:180px"></canvas></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════════════════════
+const DB = {
+  materiais:[],
+  servicos:[],
+  locais:[],
+  compras:[]
+};
+
+const UL = {un:'un',dz:'dz',m2:'m²',m3:'m³',ml:'ml',kg:'kg',sc:'sc',cx:'cx',lt:'lt',pc:'pc',bd:'bd',rl:'rl'};
+const UN_LABEL = {un:'Unidade',dz:'Dúzia',m2:'m²',m3:'m³',ml:'Metro Linear',kg:'Kg',sc:'Saco',cx:'Caixa',lt:'Litro',pc:'Peça',bd:'Balde',rl:'Rolo'};
+
+let WEB_APP = localStorage.getItem('wp6')  || '';
+let SHEET_ID= localStorage.getItem('sid6') || '1mTrzGNHt0rPxf-uNabcHHCe4p5MnT2Cy6_thMM77xOQ';
+let syncTimer = null;
+let charts = {};
+
+const STATUS_LOCAL = {
+  nao_iniciado:{lbl:'Não Iniciado',cls:'badge-red',prog:0},
+  em_andamento:{lbl:'Em Andamento',cls:'badge-gold',prog:50},
+  concluido:{lbl:'Concluído',cls:'badge-green',prog:100},
+  pausado:{lbl:'Pausado',cls:'badge-gray',prog:0}
+};
+const STATUS_PGTO = {
+  pago:{lbl:'Pago',cls:'badge-green'},
+  apagar:{lbl:'A Pagar',cls:'badge-red'},
+  parcial:{lbl:'Parcial',cls:'badge-gold'}
+};
+const STATUS_INST = {
+  sim:{lbl:'Com instalação',cls:'badge-blue'},
+  nao:{lbl:'Sem instalação',cls:'badge-gray'},
+  parcial:{lbl:'Parcial',cls:'badge-orange'}
+};
+const STATUS_COMP = {
+  comprado:{lbl:'Comprado',cls:'badge-green'},
+  pendente:{lbl:'A Comprar',cls:'badge-gold'},
+  orcamento:{lbl:'Orçamento',cls:'badge-blue'}
+};
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+window.onload = ()=>{
+  carregar();
+  renderAll();
+  if(WEB_APP){ iniciarSync(); syncNow(); }
+  else{ setSyncStatus('off','Sheets não configurado'); }
+};
+
+function $(id){ return document.getElementById(id); }
+
+function carregar(){
+  ['materiais','servicos','locais','compras'].forEach(k=>{
+    const d = localStorage.getItem('cpro6_'+k);
+    if(d) try{ DB[k]=JSON.parse(d); }catch(e){}
+  });
+}
+function salvarLS(k){ localStorage.setItem('cpro6_'+k,JSON.stringify(DB[k])); }
+
+function renderAll(){
+  renderMat(); renderServ(); renderLoc(); renderComp();
+  atualizarStats(); atualizarSelectores();
+}
+
+// ══════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════════════════════
+function mudarAba(aba, btn){
+  document.querySelectorAll('.form-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  $('sec-'+aba).classList.add('active');
+  btn.classList.add('active');
+  if(aba==='dashboard') renderDash();
+}
+
+// ══════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════
+function atualizarStats(){
+  const totMat  = DB.materiais.reduce((a,i)=>a+i.valor,0);
+  const totServ = DB.servicos.reduce((a,i)=>a+i.valor,0);
+  const totComp = DB.compras.reduce((a,i)=>a+i.valor,0);
+  const totalGeral = totMat + totServ + totComp;
+  const servPagar  = DB.servicos.filter(s=>s.pgto==='apagar').reduce((a,i)=>a+i.valor,0);
+
+  $('statsRow').innerHTML = `
+    <div class="stat g"><div class="stat-lbl">📦 Materiais</div><div class="stat-val">${DB.materiais.length}</div></div>
+    <div class="stat pu"><div class="stat-lbl">🔧 Serviços</div><div class="stat-val">R$ ${fmt(totServ)}</div></div>
+    <div class="stat re"><div class="stat-lbl">⚠️ A Pagar</div><div class="stat-val">R$ ${fmt(servPagar)}</div></div>
+    <div class="stat bl"><div class="stat-lbl">🛒 Compras</div><div class="stat-val">R$ ${fmt(totComp)}</div></div>
+    <div class="stat gr"><div class="stat-lbl">🏠 Locais</div><div class="stat-val">${DB.locais.length}</div></div>
+    <div class="stat or"><div class="stat-lbl">💰 Total Geral</div><div class="stat-val">R$ ${fmt(totalGeral)}</div></div>
+  `;
+}
+
+function fmt(v){ return (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(d){ if(!d)return'—'; try{return new Date(d).toLocaleDateString('pt-BR');}catch{return d;} }
+function uid(){ return Date.now()+'_'+Math.random().toString(36).slice(2,7); }
+function now(){ return new Date().toISOString(); }
+
+// ══════════════════════════════════════════════════════════
+// SELECTORES (LOCAIS → select dos outros módulos)
+// ══════════════════════════════════════════════════════════
+function atualizarSelectores(){
+  const locOptions = DB.locais.map(l=>`<option value="${l.id}">${l.nome}</option>`).join('');
+  ['s-local','c-local','c-fLocal'].forEach(id=>{
+    const el = $(id); if(!el) return;
+    const primeiro = id==='c-fLocal'
+      ? '<option value="">Todos os locais</option>'
+      : '<option value="">Geral / Sem destino</option>';
+    el.innerHTML = primeiro + locOptions;
+  });
+
+  // Lojas para filtro de materiais
+  const lojas = [...new Set(DB.materiais.map(i=>i.loja))];
+  $('m-fLoja').innerHTML = '<option value="">Todas as lojas</option>'
+    + lojas.map(l=>`<option value="${l}">${l}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ██ MATERIAIS
+// ══════════════════════════════════════════════════════════
+function salvarMaterial(){
+  const material = $('m-material').value.trim();
+  const marca    = $('m-marca').value.trim();
+  const loja     = $('m-loja').value.trim();
+  const valor    = parseFloat($('m-valor').value);
+  const qtd      = parseFloat($('m-qtd').value);
+  const unidade  = $('m-unidade').value;
+  const editId   = $('m-editId').value;
+
+  if(!material||!loja||isNaN(valor)||isNaN(qtd)||qtd<=0){toast('Preencha todos os campos obrigatórios.','e');return;}
+
+  const fator = unidade==='dz'?12:1;
+  const vu    = valor/(qtd*fator);
+
+  if(editId){
+    const idx = DB.materiais.findIndex(i=>i.id===editId);
+    if(idx>-1) DB.materiais[idx]={...DB.materiais[idx],material,marca,loja,valor,qtd,unidade,vu,updatedAt:now()};
+    toast('Material atualizado!','s');
+  } else {
+    DB.materiais.push({id:uid(),material,marca,loja,valor,qtd,unidade,vu,createdAt:now(),updatedAt:now()});
+    toast('Material adicionado!','s');
+  }
+  salvarLS('materiais'); cancelarMat(); renderMat(); atualizarStats(); atualizarSelectores();
+  if(WEB_APP) push('materiais');
+}
+
+function cancelarMat(){
+  ['m-material','m-marca','m-loja','m-valor','m-qtd'].forEach(id=>$(id).value='');
+  $('m-unidade').value='un'; $('m-editId').value='';
+  $('matFormTitle').textContent='Novo Material';
+}
+
+function editarMat(id){
+  const i=DB.materiais.find(x=>x.id===id); if(!i)return;
+  $('m-material').value=i.material; $('m-marca').value=i.marca||'';
+  $('m-loja').value=i.loja; $('m-valor').value=i.valor;
+  $('m-qtd').value=i.qtd; $('m-unidade').value=i.unidade;
+  $('m-editId').value=i.id; $('matFormTitle').textContent='Editar Material';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function excluirMat(id){
+  if(!confirm('Excluir material?'))return;
+  DB.materiais=DB.materiais.filter(i=>i.id!==id);
+  salvarLS('materiais'); renderMat(); atualizarStats();
+  if(WEB_APP) push('materiais'); toast('Excluído.','i');
+}
+
+function renderMat(){
+  const filtro  = $('m-filtro').value.toLowerCase();
+  const fLoja   = $('m-fLoja').value;
+  const fUnid   = $('m-fUnidade').value;
+
+  let it = DB.materiais.filter(i=>{
+    const txt = (i.material+' '+i.loja+' '+(i.marca||'')).toLowerCase();
+    return(!filtro||txt.includes(filtro))&&(!fLoja||i.loja===fLoja)&&(!fUnid||i.unidade===fUnid);
+  });
+
+  const menores={};
+  it.forEach(i=>{ if(!menores[i.material]||i.vu<menores[i.material]) menores[i.material]=i.vu; });
+
+  if(!it.length){ $('tMat').innerHTML=`<tr><td colspan="6"><div class="no-data"><div class="ico">📦</div>Nenhum resultado</div></td></tr>`; return; }
+
+  $('tMat').innerHTML = it.map(i=>{
+    const best = i.vu===menores[i.material];
+    const qtlbl= i.unidade==='dz'?`${i.qtd}dz (${i.qtd*12}un)`:`${i.qtd} ${UL[i.unidade]||i.unidade}`;
+    return `<tr>
+      <td><div style="font-weight:600">${i.material}${best?'<span class="badge badge-green" style="margin-left:6px">✓ Mais barato</span>':''}</div>
+          ${i.marca?`<div style="margin-top:3px"><span class="badge badge-gold">${i.marca}</span></div>`:''}</td>
+      <td>${i.loja}</td>
+      <td>${qtlbl}</td>
+      <td>R$ ${fmt(i.valor)}</td>
+      <td style="color:${best?'var(--green)':'var(--text)'};font-weight:${best?700:400}">R$ ${i.vu.toFixed(4)}/${i.unidade==='dz'?'un':UL[i.unidade]||i.unidade}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editarMat('${i.id}')">✏️</button>
+          <button class="btn btn-red btn-sm" onclick="excluirMat('${i.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ██ SERVIÇOS
+// ══════════════════════════════════════════════════════════
+function salvarServico(){
+  const descricao  = $('s-descricao').value.trim();
+  const empresa    = $('s-empresa').value.trim();
+  const pedreiro   = $('s-pedreiro').value.trim();
+  const valor      = parseFloat($('s-valor').value);
+  const data       = $('s-data').value;
+  const instalacao = $('s-instalacao').value;
+  const pgto       = $('s-pgto').value;
+  const localId    = $('s-local').value;
+  const obs        = $('s-obs').value.trim();
+  const editId     = $('s-editId').value;
+
+  if(!descricao||!empresa||isNaN(valor)){toast('Preencha Descrição, Empresa e Valor.','e');return;}
+
+  const localNome = localId ? (DB.locais.find(l=>l.id===localId)||{}).nome||'' : '';
+
+  const obj = {id:editId||uid(),descricao,empresa,pedreiro,valor,data,instalacao,pgto,localId,localNome,obs,updatedAt:now()};
+  if(!editId) obj.createdAt=now();
+
+  if(editId){
+    const idx=DB.servicos.findIndex(i=>i.id===editId);
+    if(idx>-1) DB.servicos[idx]={...DB.servicos[idx],...obj};
+    toast('Serviço atualizado!','s');
+  } else {
+    DB.servicos.push(obj);
+    toast('Serviço adicionado!','s');
+  }
+  salvarLS('servicos'); cancelarServ(); renderServ(); atualizarStats();
+  if(WEB_APP) push('servicos');
+}
+
+function cancelarServ(){
+  ['s-descricao','s-empresa','s-pedreiro','s-valor','s-data','s-obs'].forEach(id=>$(id).value='');
+  $('s-instalacao').value='sim'; $('s-pgto').value='apagar'; $('s-local').value=''; $('s-editId').value='';
+  $('servFormTitle').textContent='Novo Serviço';
+}
+
+function editarServ(id){
+  const i=DB.servicos.find(x=>x.id===id); if(!i)return;
+  $('s-descricao').value=i.descricao; $('s-empresa').value=i.empresa;
+  $('s-pedreiro').value=i.pedreiro||''; $('s-valor').value=i.valor;
+  $('s-data').value=i.data||''; $('s-instalacao').value=i.instalacao||'sim';
+  $('s-pgto').value=i.pgto||'apagar'; $('s-local').value=i.localId||'';
+  $('s-obs').value=i.obs||''; $('s-editId').value=i.id;
+  $('servFormTitle').textContent='Editar Serviço';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function excluirServ(id){
+  if(!confirm('Excluir serviço?'))return;
+  DB.servicos=DB.servicos.filter(i=>i.id!==id);
+  salvarLS('servicos'); renderServ(); atualizarStats();
+  if(WEB_APP) push('servicos'); toast('Excluído.','i');
+}
+
+function renderServ(){
+  const filtro = $('s-filtro').value.toLowerCase();
+  const fPgto  = $('s-fPgto').value;
+  const fInst  = $('s-fInst').value;
+
+  let it = DB.servicos.filter(i=>{
+    const txt=(i.descricao+' '+(i.empresa||'')+' '+(i.pedreiro||'')).toLowerCase();
+    return(!filtro||txt.includes(filtro))&&(!fPgto||i.pgto===fPgto)&&(!fInst||i.instalacao===fInst);
+  });
+
+  if(!it.length){ $('tServ').innerHTML=`<tr><td colspan="9"><div class="no-data"><div class="ico">🔧</div>Nenhum serviço cadastrado</div></td></tr>`; return; }
+
+  $('tServ').innerHTML = it.map(i=>{
+    const pgto = STATUS_PGTO[i.pgto]||STATUS_PGTO.apagar;
+    const inst = STATUS_INST[i.instalacao]||STATUS_INST.nao;
+    return `<tr>
+      <td><div style="font-weight:600">${i.descricao}</div>${i.obs?`<div style="font-size:.73rem;color:var(--muted)">${i.obs}</div>`:''}</td>
+      <td>${i.empresa}</td>
+      <td>${i.pedreiro||'—'}</td>
+      <td>${i.localNome||'—'}</td>
+      <td style="font-weight:700;color:var(--gold)">R$ ${fmt(i.valor)}</td>
+      <td><span class="badge ${inst.cls}">${inst.lbl}</span></td>
+      <td><span class="badge ${pgto.cls}">${pgto.lbl}</span></td>
+      <td>${i.data?fmtDate(i.data):'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editarServ('${i.id}')">✏️</button>
+          <button class="btn btn-red btn-sm" onclick="excluirServ('${i.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ██ LOCAIS
+// ══════════════════════════════════════════════════════════
+function salvarLocal(){
+  const nome      = $('l-nome').value.trim();
+  const tipo      = $('l-tipo').value;
+  const status    = $('l-status').value;
+  const progresso = Math.min(100,Math.max(0,parseInt($('l-progresso').value)||0));
+  const prioridade= $('l-prioridade').value;
+  const obs       = $('l-obs').value.trim();
+  const editId    = $('l-editId').value;
+
+  if(!nome){toast('Informe o nome do local.','e');return;}
+
+  const obj={id:editId||uid(),nome,tipo,status,progresso,prioridade,obs,updatedAt:now()};
+  if(!editId) obj.createdAt=now();
+
+  if(editId){
+    const idx=DB.locais.findIndex(i=>i.id===editId);
+    if(idx>-1) DB.locais[idx]={...DB.locais[idx],...obj};
+    toast('Local atualizado!','s');
+  } else {
+    DB.locais.push(obj);
+    toast('Local adicionado!','s');
+  }
+  salvarLS('locais'); cancelarLoc(); renderLoc(); atualizarStats(); atualizarSelectores();
+  if(WEB_APP) push('locais');
+}
+
+function cancelarLoc(){
+  ['l-nome','l-obs','l-progresso'].forEach(id=>$(id).value='');
+  $('l-tipo').value='sala'; $('l-status').value='nao_iniciado'; $('l-prioridade').value='media'; $('l-editId').value='';
+  $('locFormTitle').textContent='Novo Local';
+}
+
+function editarLoc(id){
+  const i=DB.locais.find(x=>x.id===id); if(!i)return;
+  $('l-nome').value=i.nome; $('l-tipo').value=i.tipo;
+  $('l-status').value=i.status; $('l-progresso').value=i.progresso||0;
+  $('l-prioridade').value=i.prioridade||'media'; $('l-obs').value=i.obs||'';
+  $('l-editId').value=i.id; $('locFormTitle').textContent='Editar Local';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function excluirLoc(id){
+  if(!confirm('Excluir este local? Serviços e compras vinculados perderão o vínculo.'))return;
+  DB.locais=DB.locais.filter(i=>i.id!==id);
+  salvarLS('locais'); renderLoc(); atualizarStats(); atualizarSelectores();
+  if(WEB_APP) push('locais'); toast('Local excluído.','i');
+}
+
+const PRIO_COR={alta:'var(--red)',media:'var(--gold)',baixa:'var(--green)'};
+const TIPO_ICON={sala:'🛋️',cozinha:'🍳',quarto:'🛏️',banheiro:'🚿',area:'🌿',garagem:'🚗',quintal:'🌳',corredor:'🚶',fachada:'🏢',outro:'📍'};
+
+function renderLoc(){
+  const locais = DB.locais;
+  if(!locais.length){
+    $('gridLocais').innerHTML='<div class="no-data"><div class="ico">🏠</div>Nenhum local cadastrado</div>';
+    return;
+  }
+  $('gridLocais').innerHTML = locais.map(l=>{
+    const st  = STATUS_LOCAL[l.status]||STATUS_LOCAL.nao_iniciado;
+    const prog= l.progresso||0;
+    const ico = TIPO_ICON[l.tipo]||'📍';
+    const servVinc = DB.servicos.filter(s=>s.localId===l.id).length;
+    const compVinc = DB.compras.filter(c=>c.localId===l.id).length;
+    return `<div class="local-card">
+      <div class="lc-header">
+        <div class="lc-name">${ico} ${l.nome}</div>
+        <span class="badge ${st.cls}">${st.lbl}</span>
+      </div>
+      <div class="lc-meta">
+        Prioridade: <span style="color:${PRIO_COR[l.prioridade]||'var(--muted)'}; font-weight:700">${(l.prioridade||'—').charAt(0).toUpperCase()+(l.prioridade||'').slice(1)}</span>
+        ${servVinc?` · ${servVinc} serv.`:''} ${compVinc?` · ${compVinc} compras`:''}
+      </div>
+      ${l.obs?`<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px">${l.obs}</div>`:''}
+      <div class="progress" style="margin-bottom:6px">
+        <div class="progress-bar" style="width:${prog}%;background:${prog>=100?'var(--green)':prog>50?'var(--gold)':'var(--blue)'}"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);text-align:right">${prog}% concluído</div>
+      <div class="lc-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editarLoc('${l.id}')">✏️ Editar</button>
+        <button class="btn btn-red btn-sm" onclick="excluirLoc('${l.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLoc(){ // redeclarada abaixo para incluir update de DOM
+  const locais = DB.locais;
+  if(!locais.length){
+    $('gridLocais').innerHTML='<div class="no-data"><div class="ico">🏠</div>Nenhum local cadastrado</div>';
+    return;
+  }
+  $('gridLocais').innerHTML = locais.map(l=>{
+    const st  = STATUS_LOCAL[l.status]||STATUS_LOCAL.nao_iniciado;
+    const prog= l.progresso||0;
+    const ico = TIPO_ICON[l.tipo]||'📍';
+    const servVinc = DB.servicos.filter(s=>s.localId===l.id).length;
+    const compVinc = DB.compras.filter(c=>c.localId===l.id).length;
+    return `<div class="local-card">
+      <div class="lc-header">
+        <div class="lc-name">${ico} ${l.nome}</div>
+        <span class="badge ${st.cls}">${st.lbl}</span>
+      </div>
+      <div class="lc-meta">
+        Prioridade: <span style="color:${PRIO_COR[l.prioridade]||'var(--muted)'}; font-weight:700">${(l.prioridade||'—').charAt(0).toUpperCase()+(l.prioridade||'').slice(1)}</span>
+        ${servVinc?` · ${servVinc} serv.`:''} ${compVinc?` · ${compVinc} compras`:''}
+      </div>
+      ${l.obs?`<div style="font-size:.75rem;color:var(--muted);margin-bottom:8px">${l.obs}</div>`:''}
+      <div class="progress" style="margin-bottom:6px">
+        <div class="progress-bar" style="width:${prog}%;background:${prog>=100?'var(--green)':prog>50?'var(--gold)':'var(--blue)'}"></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);text-align:right">${prog}% concluído</div>
+      <div class="lc-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editarLoc('${l.id}')">✏️ Editar</button>
+        <button class="btn btn-red btn-sm" onclick="excluirLoc('${l.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ██ COMPRAS
+// ══════════════════════════════════════════════════════════
+function salvarCompra(){
+  const material = $('c-material').value.trim();
+  const marca    = $('c-marca').value.trim();
+  const loja     = $('c-loja').value.trim();
+  const valor    = parseFloat($('c-valor').value);
+  const qtd      = parseFloat($('c-qtd').value)||1;
+  const unidade  = $('c-unidade').value;
+  const status   = $('c-status').value;
+  const localId  = $('c-local').value;
+  const data     = $('c-data').value;
+  const obs      = $('c-obs').value.trim();
+  const editId   = $('c-editId').value;
+
+  if(!material||!loja||isNaN(valor)){toast('Preencha Material, Loja e Valor.','e');return;}
+
+  const localNome = localId ? (DB.locais.find(l=>l.id===localId)||{}).nome||'' : '';
+
+  const obj={id:editId||uid(),material,marca,loja,valor,qtd,unidade,status,localId,localNome,data,obs,updatedAt:now()};
+  if(!editId) obj.createdAt=now();
+
+  if(editId){
+    const idx=DB.compras.findIndex(i=>i.id===editId);
+    if(idx>-1) DB.compras[idx]={...DB.compras[idx],...obj};
+    toast('Compra atualizada!','s');
+  } else {
+    DB.compras.push(obj);
+    toast('Compra registrada!','s');
+  }
+  salvarLS('compras'); cancelarComp(); renderComp(); atualizarStats();
+  if(WEB_APP) push('compras');
+}
+
+function cancelarComp(){
+  ['c-material','c-marca','c-loja','c-valor','c-data','c-obs'].forEach(id=>$(id).value='');
+  $('c-qtd').value='1'; $('c-unidade').value='un'; $('c-status').value='pendente'; $('c-local').value=''; $('c-editId').value='';
+  $('compFormTitle').textContent='Nova Compra';
+}
+
+function editarComp(id){
+  const i=DB.compras.find(x=>x.id===id); if(!i)return;
+  $('c-material').value=i.material; $('c-marca').value=i.marca||'';
+  $('c-loja').value=i.loja; $('c-valor').value=i.valor;
+  $('c-qtd').value=i.qtd||1; $('c-unidade').value=i.unidade||'un';
+  $('c-status').value=i.status||'pendente'; $('c-local').value=i.localId||'';
+  $('c-data').value=i.data||''; $('c-obs').value=i.obs||''; $('c-editId').value=i.id;
+  $('compFormTitle').textContent='Editar Compra';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function excluirComp(id){
+  if(!confirm('Excluir compra?'))return;
+  DB.compras=DB.compras.filter(i=>i.id!==id);
+  salvarLS('compras'); renderComp(); atualizarStats();
+  if(WEB_APP) push('compras'); toast('Excluído.','i');
+}
+
+function renderComp(){
+  const filtro  = $('c-filtro').value.toLowerCase();
+  const fStatus = $('c-fStatus').value;
+  const fLocal  = $('c-fLocal').value;
+
+  let it = DB.compras.filter(i=>{
+    const txt=(i.material+' '+(i.marca||'')+' '+i.loja).toLowerCase();
+    return(!filtro||txt.includes(filtro))&&(!fStatus||i.status===fStatus)&&(!fLocal||i.localId===fLocal);
+  });
+
+  // Totalizadores
+  const tots={comprado:0,pendente:0,orcamento:0};
+  it.forEach(i=>{ tots[i.status]=(tots[i.status]||0)+i.valor; });
+  $('tot-comprado').textContent='R$ '+fmt(tots.comprado);
+  $('tot-pendente').textContent='R$ '+fmt(tots.pendente);
+  $('tot-orcamento').textContent='R$ '+fmt(tots.orcamento);
+  $('tot-geral').textContent='R$ '+fmt(tots.comprado+tots.pendente+tots.orcamento);
+
+  if(!it.length){ $('tComp').innerHTML=`<tr><td colspan="8"><div class="no-data"><div class="ico">🛒</div>Nenhuma compra registrada</div></td></tr>`; return; }
+
+  $('tComp').innerHTML = it.map(i=>{
+    const st = STATUS_COMP[i.status]||STATUS_COMP.pendente;
+    const qtlbl = i.unidade==='dz'?`${i.qtd}dz`:`${i.qtd} ${UL[i.unidade]||i.unidade}`;
+    return `<tr>
+      <td><div style="font-weight:600">${i.material}</div>
+          ${i.marca?`<span class="badge badge-gold">${i.marca}</span>`:''}</td>
+      <td>${i.loja}</td>
+      <td>${qtlbl}</td>
+      <td style="font-weight:700">R$ ${fmt(i.valor)}</td>
+      <td>${i.localNome||'—'}</td>
+      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
+      <td>${i.data?fmtDate(i.data):'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editarComp('${i.id}')">✏️</button>
+          <button class="btn btn-red btn-sm" onclick="excluirComp('${i.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ██ DASHBOARD
+// ══════════════════════════════════════════════════════════
+const CORES=['#f59e0b','#10b981','#3b82f6','#8b5cf6','#f97316','#ef4444','#06b6d4','#84cc16'];
+
+function destroyChart(id){ if(charts[id]){charts[id].destroy();charts[id]=null;} }
+
+function renderDash(){
+  // Gastos por loja
+  destroyChart('lojas');
+  const agg={};
+  DB.materiais.forEach(i=>{ agg[i.loja]=(agg[i.loja]||0)+i.valor; });
+  if(Object.keys(agg).length){
+    charts.lojas=new Chart($('ch-lojas'),{type:'doughnut',data:{labels:Object.keys(agg),datasets:[{data:Object.values(agg),backgroundColor:CORES,borderWidth:0}]},
+      options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8',font:{family:'DM Sans'}}}}}});
+  }
+
+  // Serviços pago vs a pagar
+  destroyChart('servPgto');
+  const pago=DB.servicos.filter(s=>s.pgto==='pago').reduce((a,i)=>a+i.valor,0);
+  const apagar=DB.servicos.filter(s=>s.pgto==='apagar').reduce((a,i)=>a+i.valor,0);
+  const parcial=DB.servicos.filter(s=>s.pgto==='parcial').reduce((a,i)=>a+i.valor,0);
+  charts.servPgto=new Chart($('ch-servPgto'),{type:'doughnut',data:{labels:['Pago','A Pagar','Parcial'],datasets:[{data:[pago,apagar,parcial],backgroundColor:['#10b981','#ef4444','#f59e0b'],borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}}}});
+
+  // Progresso por local
+  destroyChart('locais');
+  if(DB.locais.length){
+    charts.locais=new Chart($('ch-locais'),{type:'bar',
+      data:{labels:DB.locais.map(l=>l.nome),datasets:[{label:'% Concluído',data:DB.locais.map(l=>l.progresso||0),backgroundColor:DB.locais.map(l=>(l.progresso||0)>=100?'#10b981':(l.progresso||0)>50?'#f59e0b':'#3b82f6'),borderRadius:6}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'#272d40'}},y:{min:0,max:100,ticks:{color:'#94a3b8',callback:v=>v+'%'},grid:{color:'#272d40'}}}}});
+  }
+
+  // Compras status
+  destroyChart('compStatus');
+  const comp=DB.compras.filter(c=>c.status==='comprado').reduce((a,i)=>a+i.valor,0);
+  const pend=DB.compras.filter(c=>c.status==='pendente').reduce((a,i)=>a+i.valor,0);
+  const orc=DB.compras.filter(c=>c.status==='orcamento').reduce((a,i)=>a+i.valor,0);
+  charts.compStatus=new Chart($('ch-compStatus'),{type:'doughnut',data:{labels:['Comprado','A Comprar','Orçamento'],datasets:[{data:[comp,pend,orc],backgroundColor:['#10b981','#f59e0b','#3b82f6'],borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{labels:{color:'#94a3b8'}}}}});
+
+  // Top materiais
+  destroyChart('topMat');
+  const aggM={};
+  DB.materiais.forEach(i=>{ aggM[i.material]=(aggM[i.material]||0)+i.valor; });
+  const top=Object.entries(aggM).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(top.length){
+    charts.topMat=new Chart($('ch-topMat'),{type:'bar',
+      data:{labels:top.map(x=>x[0]),datasets:[{data:top.map(x=>x[1]),backgroundColor:CORES,borderRadius:6}]},
+      options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8',callback:v=>'R$'+v},grid:{color:'#272d40'}},y:{ticks:{color:'#94a3b8'},grid:{display:false}}}}});
+  }
+
+  // Resumo financeiro
+  destroyChart('financeiro');
+  const totM=DB.materiais.reduce((a,i)=>a+i.valor,0);
+  const totS=DB.servicos.reduce((a,i)=>a+i.valor,0);
+  const totC=DB.compras.reduce((a,i)=>a+i.valor,0);
+  charts.financeiro=new Chart($('ch-financeiro'),{type:'bar',
+    data:{labels:['Materiais Cadastrados','Serviços','Compras (Pendente)','Total Geral'],
+    datasets:[{data:[totM,totS,pend,totM+totS+totC],backgroundColor:['#f59e0b99','#8b5cf699','#ef444499','#10b98199'],borderColor:['#f59e0b','#8b5cf6','#ef4444','#10b981'],borderWidth:1.5,borderRadius:8}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{display:false}},y:{ticks:{color:'#94a3b8',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'#272d40'}}}}});
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORTAR EXCEL
+// ══════════════════════════════════════════════════════════
+function exportar(modulo){
+  let rows=[],nome=modulo;
+  if(modulo==='materiais'){
+    rows=DB.materiais.map(i=>({'Material':i.material,'Marca':i.marca||'','Loja':i.loja,'Qtd':i.qtd,'Unidade':UN_LABEL[i.unidade]||i.unidade,'Valor Total':i.valor,'Valor Unit.':+i.vu.toFixed(4)}));
+  } else if(modulo==='servicos'){
+    rows=DB.servicos.map(i=>({'Descrição':i.descricao,'Empresa':i.empresa,'Pedreiro':i.pedreiro||'','Local':i.localNome||'','Valor':i.valor,'Instalação':i.instalacao,'Pagamento':i.pgto,'Data':i.data,'Obs':i.obs||''}));
+  } else if(modulo==='compras'){
+    rows=DB.compras.map(i=>({'Material':i.material,'Marca':i.marca||'','Loja':i.loja,'Qtd':i.qtd,'Unidade':UN_LABEL[i.unidade]||i.unidade,'Valor':i.valor,'Local':i.localNome||'','Status':i.status,'Data':i.data,'Obs':i.obs||''}));
+  }
+  if(!rows.length){toast('Nenhum dado para exportar.','e');return;}
+
+  // XLSX inline via script dinâmico
+  const sc=document.createElement('script');
+  sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  sc.onload=()=>{
+    const ws=XLSX.utils.json_to_sheet(rows);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,nome);
+    XLSX.writeFile(wb,`construcao_${nome}.xlsx`);
+    toast('Excel exportado!','s');
+  };
+  document.head.appendChild(sc);
+}
+
+async function gerarPDF(){
+  if(!DB.materiais.length){toast('Nenhum material para PDF.','e');return;}
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'landscape'});
+  doc.setFontSize(14); doc.text('Construção PRO 6.0 — Materiais',14,14);
+  doc.setFontSize(8); doc.text('Gerado: '+new Date().toLocaleString('pt-BR'),14,20);
+  const ths=['Material','Marca','Loja','Qtd','Valor Total','Valor Unit.'];
+  const cs=[14,55,80,120,148,175];
+  let y=28;
+  doc.setFontSize(7);
+  ths.forEach((h,i)=>doc.text(h,cs[i],y)); y+=6;
+  DB.materiais.forEach(item=>{
+    if(y>190){doc.addPage();y=20;}
+    const row=[item.material,item.marca||'—',item.loja,item.qtd+' '+item.unidade,'R$'+fmt(item.valor),'R$'+item.vu.toFixed(4)];
+    row.forEach((v,i)=>doc.text(String(v).substring(0,20),cs[i],y)); y+=5;
+  });
+  doc.save('materiais.pdf'); toast('PDF gerado!','s');
+}
+
+// ══════════════════════════════════════════════════════════
+// GOOGLE SHEETS
+// ══════════════════════════════════════════════════════════
+function salvarConfig(){
+  WEB_APP = $('mWebApp').value.trim();
+  SHEET_ID= $('mSheetId').value.trim();
+  localStorage.setItem('wp6',WEB_APP);
+  localStorage.setItem('sid6',SHEET_ID);
+  $('mConfig').classList.remove('open');
+  if(WEB_APP){ toast('Conectando ao Google Sheets...','i'); iniciarSync(); syncNow(); }
+  else{ setSyncStatus('off','Sheets não configurado'); }
+}
+
+function iniciarSync(){
+  if(syncTimer) clearInterval(syncTimer);
+  syncTimer=setInterval(pullSheets,30000);
+}
+
+async function syncNow(){
+  setSyncStatus('sync','Sincronizando...');
+  await pushAll();
+  await pullSheets();
+}
+
+async function pushAll(){
+  if(!WEB_APP) return;
+  try{
+    await fetch(WEB_APP,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'syncAll',db:DB})});
+  }catch(e){ setSyncStatus('off','Erro ao enviar dados'); }
+}
+
+async function push(modulo){
+  if(!WEB_APP) return;
+  try{
+    await fetch(WEB_APP,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'syncModulo',modulo,dados:DB[modulo]})});
+    setSyncStatus('on','Sincronizado · '+new Date().toLocaleTimeString('pt-BR'));
+  }catch(e){}
+}
+
+async function pullSheets(){
+  if(!WEB_APP) return;
+  try{
+    const r=await fetch(WEB_APP+'?action=getAll&t='+Date.now());
+    const j=await r.json();
+    if(j.success&&j.db){
+      ['materiais','servicos','locais','compras'].forEach(k=>{
+        if(!Array.isArray(j.db[k])) return;
+        const mapaLocal={};
+        DB[k].forEach(i=>mapaLocal[i.id]=i);
+        j.db[k].forEach(i=>{
+          if(!mapaLocal[i.id]||new Date(i.updatedAt)>new Date(mapaLocal[i.id].updatedAt||0))
+            mapaLocal[i.id]=i;
+        });
+        DB[k]=Object.values(mapaLocal);
+        salvarLS(k);
+      });
+      renderAll();
+      setSyncStatus('on','Sincronizado · '+new Date().toLocaleTimeString('pt-BR'));
+    }
+  }catch(e){ setSyncStatus('off','Falha na conexão'); }
+}
+
+function setSyncStatus(s,msg){
+  const d=$('syncDot'); const t=$('syncTxt');
+  d.className='dot'+(s==='off'?' off':s==='sync'?' sync':'');
+  t.textContent=msg;
+}
+
+// ══════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════
+function toast(msg,tipo='i'){
+  const c=$('toasts');
+  const el=document.createElement('div');
+  el.className='toast '+tipo;
+  el.innerHTML=msg;
+  c.appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+</script>
+</body>
+</html>
